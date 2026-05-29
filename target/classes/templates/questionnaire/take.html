@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${questionnaire.title} + ' - 语文魔方'"></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        body {
+            background-color: #f5f7fa;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .logo img {
+            width: 36px;
+            height: 36px;
+        }
+        .nav {
+            display: flex;
+            gap: 25px;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+        .nav a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .user-info:hover {
+            opacity: 0.8;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .username {
+            font-size: 14px;
+            color: white;
+        }
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .logout-btn:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        }
+        .form-section {
+            margin-bottom: 40px;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            color: #606266;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .form-label .required {
+            color: #f56c6c;
+            margin-left: 4px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dcdfe6;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background-color: white;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .gender-group {
+            display: flex;
+            gap: 20px;
+        }
+        .gender-option {
+            flex: 1;
+            position: relative;
+        }
+        .gender-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .gender-option label {
+            display: block;
+            padding: 12px 20px;
+            border: 2px solid #dcdfe6;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        .gender-option input[type="radio"]:checked + label {
+            border-color: #667eea;
+            background-color: #f0f4ff;
+            color: #667eea;
+            font-weight: bold;
+        }
+        .gender-option input[type="radio"]:checked + label::after {
+            content: '✓';
+            float: right;
+            color: #667eea;
+            font-weight: bold;
+        }
+        .select-wrapper {
+            position: relative;
+        }
+        .select-wrapper::after {
+            content: '▼';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #909399;
+            pointer-events: none;
+            font-size: 12px;
+        }
+        .select-wrapper select {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border: 2px solid #dcdfe6;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+        .hint-text {
+            color: #909399;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        .progress-container {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f5f7fa;
+            border-radius: 6px;
+        }
+        .progress-bar {
+            background-color: #e4e7ed;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .progress-fill {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: #606266;
+        }
+        .question-section {
+            display: block;
+        }
+        .question-item {
+            margin-bottom: 30px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .question-item:last-child {
+            border-bottom: none;
+        }
+        .question-header {
+            margin-bottom: 15px;
+        }
+        .question-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: #f0f4ff;
+            color: #667eea;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        [data-dimension="RESILIENCE"] .question-tag {
+            background-color: #f0f4ff;
+            color: #667eea;
+        }
+        .question-number {
+            color: #606266;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .question-text {
+            font-size: 16px;
+            color: #303133;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+        .options-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .option-item {
+            flex: 1;
+            min-width: 80px;
+            position: relative;
+        }
+        .option-item input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .option-item label {
+            display: block;
+            padding: 10px 8px;
+            border: 2px solid #dcdfe6;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+            background-color: white;
+        }
+        .option-item label:hover {
+            border-color: #667eea;
+            background-color: #f0f4ff;
+        }
+        .option-item input[type="radio"]:checked + label {
+            border-color: #667eea;
+            background-color: #f0f4ff;
+            color: #667eea;
+            font-weight: bold;
+        }
+        .option-text {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+        .option-score {
+            display: none;
+            font-size: 11px;
+            color: #909399;
+        }
+        .submit-section {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f2f5;
+        }
+        .submit-btn {
+            padding: 15px 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        .submit-btn:disabled {
+            background-color: #909399;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .question-card.answered {
+            border-color: #67c23a;
+            background-color: #f0f9ff;
+        }
+        .question-card.unanswered-highlight {
+            border-color: #f56c6c !important;
+            background-color: #fef0f0 !important;
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <div class="logo">
+            <img th:src="@{/images/微信图片_20260405124109.png}" alt="Logo" onerror="this.style.display='none'">
+            <span>语文魔方</span>
+        </div>
+        <div class="nav">
+            <a th:href="@{/}">首页</a>
+            <a th:href="@{/forum}">班级留言板</a>
+            <a th:href="@{/energy}">能量监测窗</a>
+            <a th:href="@{/questionnaire}" style="background-color: rgba(255, 255, 255, 0.2);">心理问卷评估</a>
+            <a th:href="@{/diagnosis/personal}">学情诊断报告</a>
+        </div>
+    </div>
+    <div class="header-right">
+        <div class="user-info" onclick="window.location.href='/profile'">
+            <div class="user-avatar">👤</div>
+            <span class="username" th:if="${user != null}">
+                <span th:if="${user.role == 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '老师'"></span>
+                <span th:if="${user.role == 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '老师'"></span>
+                <span th:if="${user.role != 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '同学'"></span>
+                <span th:if="${user.role != 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '同学'"></span>
+            </span>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <!-- 基本信息表单区域 -->
+    <div class="form-section">
+        <div class="form-group">
+            <label class="form-label">1. 您的姓名<span class="required">*</span></label>
+            <input type="text" name="name" th:value="${user.name}" class="form-input" placeholder="请输入您的姓名" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">2. 您的性别<span class="required">*</span></label>
+            <div class="gender-group">
+                <div class="gender-option">
+                    <input type="radio" name="gender" id="genderMale" value="male" th:checked="${user.gender == 'male'}">
+                    <label for="genderMale">男</label>
+                </div>
+                <div class="gender-option">
+                    <input type="radio" name="gender" id="genderFemale" value="female" th:checked="${user.gender == 'female'}">
+                    <label for="genderFemale">女</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">3. 您的年龄<span class="required">*</span></label>
+            <div class="select-wrapper">
+                <select name="age" class="form-input" required>
+                    <option value="">请选择</option>
+                    <option th:each="i : ${#numbers.sequence(10, 20)}" th:value="${i}" th:text="${i}" th:selected="${user.age == i}"></option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">4. 您的年级<span class="required">*</span></label>
+            <div class="select-wrapper">
+                <select name="grade" class="form-input" required>
+                    <option value="">请选择</option>
+                    <option value="初一" th:selected="${user.grade == '初一'}">初一</option>
+                    <option value="初二" th:selected="${user.grade == '初二'}">初二</option>
+                    <option value="初三" th:selected="${user.grade == '初三'}">初三</option>
+                    <option value="高一" th:selected="${user.grade == '高一'}">高一</option>
+                    <option value="高二" th:selected="${user.grade == '高二'}">高二</option>
+                    <option value="高三" th:selected="${user.grade == '高三'}">高三 </option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">5. 当前状态<span class="required">*</span></label>
+            <div class="select-wrapper">
+                <select name="interventionStatus" class="form-input" id="interventionStatusSelect" required>
+                    <option value="PRE_INTERVENTION" th:selected="${defaultInterventionStatus == 'PRE_INTERVENTION'}">干预前（第一次填写）</option>
+                    <option value="POST_INTERVENTION" th:selected="${defaultInterventionStatus == 'POST_INTERVENTION'}">干预后（再次填写）</option>
+                </select>
+            </div>
+            <p class="hint-text">
+                <span th:if="${defaultInterventionStatus == 'PRE_INTERVENTION'}">👈 首次填写请选择"干预前"，完成后将跳转查看分数</span>
+                <span th:if="${defaultInterventionStatus == 'POST_INTERVENTION'}">👈 已完成干预前评估，请选择"干预后"进行对比</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- 进度条区域 -->
+    <div class="progress-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">已回答 0 / 25 题</div>
+    </div>
+
+    <!-- 问卷题目区域 -->
+    <div class="question-section" id="questionSection">
+        <form th:action="@{'/questionnaire/submit/' + ${questionnaire.id}}" method="post" id="questionnaireForm">
+            <!-- 隐藏字段 -->
+            <input type="hidden" name="name" th:value="${user.name}" id="hiddenName">
+            <input type="hidden" name="gender" th:value="${user.gender}" id="hiddenGender">
+            <input type="hidden" name="age" th:value="${user.age}" id="hiddenAge">
+            <input type="hidden" name="grade" th:value="${user.grade}" id="hiddenGrade">
+            <input type="hidden" name="interventionStatus" th:value="${defaultInterventionStatus != null ? defaultInterventionStatus : 'PRE_INTERVENTION'}" id="hiddenInterventionStatus">
+            
+            <div th:each="question, iterStat : ${questionnaire.questions}"
+                 class="question-card"
+                 th:data-question-id="${question.id}"
+                 th:data-dimension="${question.dimension}"
+                 th:id="'questionCard_' + ${iterStat.index}">
+
+                <div class="question-item">
+                    <div class="question-header">
+                        <div class="question-number" th:text="'1. ' + ${iterStat.index + 1}"></div>
+                        <div class="question-tag" th:switch="${question.dimension}">
+                            <span th:case="'RESILIENCE'">心理弹性</span>
+                            <span th:case="*">未知维度</span>
+                        </div>
+                    </div>
+
+                    <div class="question-text" th:text="${question.content}"></div>
+
+                    <div class="options-group">
+                        <div th:each="option : ${question.options}" class="option-item">
+                            <input type="radio"
+                                   th:name="'question_' + ${question.id}"
+                                   th:id="'option_' + ${option.id}"
+                                   th:value="${option.scoreValue}"
+                                   required>
+                            <label th:for="'option_' + ${option.id}">
+                                <span class="option-text" th:text="${option.content}"></span>
+                                <span class="option-score" th:text="${option.scoreValue} + '分'"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="submit-section">
+                <button type="submit" class="submit-btn">提交</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('questionnaireForm');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const questionCards = document.querySelectorAll('.question-card');
+    const totalQuestions = questionCards.length;
+
+    // 为所有单选按钮添加事件监听
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', updateProgress);
+    });
+
+    // 更新进度条和已答题高亮
+    function updateProgress() {
+        const answeredQuestions = document.querySelectorAll('.question-card input[type="radio"]:checked').length;
+        const progress = (answeredQuestions / totalQuestions) * 100;
+        progressFill.style.width = progress + '%';
+        progressText.textContent = `已回答 ${answeredQuestions} / ${totalQuestions} 题`;
+        
+        // 为已答题的卡片添加高亮样式
+        questionCards.forEach((card, index) => {
+            const questionId = card.dataset.questionId;
+            const isAnswered = document.querySelector(`input[name="question_${questionId}"]:checked`) !== null;
+            if (isAnswered) {
+                card.classList.add('answered');
+            } else {
+                card.classList.remove('answered');
+            }
+        });
+    }
+
+    // 初始化进度（从 0 开始）
+    updateProgress();
+
+    // 表单提交验证 - 使用 click 事件代替 submit 事件
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        console.log('=== 开始表单验证 ===');
+
+        const nameInput = document.querySelector('input[name="name"]');
+        const genderInput = document.querySelector('input[name="gender"]:checked');
+        const ageInput = document.querySelector('select[name="age"]');
+        const gradeInput = document.querySelector('select[name="grade"]');
+        const interventionStatusInput = document.getElementById('interventionStatusSelect');
+
+        const name = nameInput.value;
+        const gender = genderInput ? genderInput.value : null;
+        const age = ageInput.value;
+        const grade = gradeInput.value;
+        const interventionStatus = interventionStatusInput.value;
+
+        console.log('基本信息检查:', { name, gender, age, grade, interventionStatus });
+
+        // 检查基本信息是否完整
+        if (!name || !gender || !age || !grade || !interventionStatus) {
+            // 找到缺失的字段并聚焦
+            let missingField = null;
+            if (!name) missingField = nameInput;
+            else if (!gender) {
+                const genderOptions = document.querySelectorAll('input[name="gender"]');
+                if (genderOptions.length > 0) {
+                    genderOptions[0].parentElement.scrollIntoView({behavior: 'smooth', block: 'center'});
+                }
+            }
+            else if (!age) missingField = ageInput;
+            else if (!grade) missingField = gradeInput;
+            else if (!interventionStatus) missingField = interventionStatusInput;
+
+            // 滚动到基本信息区域
+            const infoSection = document.querySelector('.form-section');
+            if (infoSection) {
+                infoSection.scrollIntoView({behavior: 'smooth', block: 'start'});
+            }
+
+            // 给缺失的字段添加红色边框高亮
+            if (missingField) {
+                missingField.style.borderColor = '#f56c6c';
+                missingField.style.boxShadow = '0 0 0 3px rgba(245, 108, 108, 0.3)';
+                missingField.focus();
+
+                // 3 秒后移除高亮
+                setTimeout(() => {
+                    missingField.style.borderColor = '';
+                    missingField.style.boxShadow = '';
+                }, 3000);
+            }
+
+            setTimeout(function() {
+                alert('❗ 请先填写完整的基本信息（姓名、性别、年龄、年级、当前状态）！\n\n已自动定位到缺失的字段。');
+            }, 100);
+
+            return false;
+        }
+
+        // 检查所有题目是否已回答
+        const unanswered = Array.from(questionCards).filter(card => {
+            const questionId = card.dataset.questionId;
+            const selectedOption = document.querySelector(`input[name="question_${questionId}"]:checked`);
+            console.log(`题目 ${questionId}:`, selectedOption ? '已答' : '未答');
+            return !selectedOption;
+        });
+
+        console.log('未答题目数量:', unanswered.length);
+
+        if (unanswered.length > 0) {
+            // 移除之前的高亮
+            questionCards.forEach(card => {
+                card.classList.remove('unanswered-highlight');
+            });
+
+            // 给未回答的题目添加红色高亮和抖动效果
+            unanswered.forEach(card => {
+                card.classList.add('unanswered-highlight');
+            });
+
+            // 滚动到第一个未回答的问题
+            unanswered[0].scrollIntoView({behavior: 'smooth', block: 'center'});
+
+            setTimeout(function() {
+                alert('❗ 您还有 ' + unanswered.length + ' 道题未回答，请完成所有题目后再提交！\n\n未回答的题目已用红色标出，请尽快完成。');
+            }, 100);
+
+            return false;
+        }
+        
+        // 将用户填写的基本信息同步到隐藏字段
+        document.getElementById('hiddenName').value = name;
+        document.getElementById('hiddenGender').value = gender;
+        document.getElementById('hiddenAge').value = age;
+        document.getElementById('hiddenGrade').value = grade;
+        document.getElementById('hiddenInterventionStatus').value = interventionStatus;
+        
+        console.log('表单验证通过，正在提交...');
+        console.log('提交数据:', {
+            name: name,
+            gender: gender,
+            age: age,
+            grade: grade,
+            interventionStatus: interventionStatus
+        });
+
+        // 显示题目区域
+        // document.getElementById('questionSection').style.display = 'block';
+
+        // 滚动到题目区域
+        // document.getElementById('questionSection').scrollIntoView({behavior: 'smooth', block: 'start'});
+
+        // 禁用提交按钮，防止重复提交
+        this.disabled = true;
+        this.textContent = '提交中...';
+        this.style.backgroundColor = '#909399';
+        this.style.cursor = 'not-allowed';
+
+        // 手动提交表单
+        form.submit();
+        return true;
+    });
+
+    // 当用户选择答案时，移除高亮
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const questionCard = this.closest('.question-card');
+            questionCard.classList.remove('unanswered-highlight');
+            updateProgress();
+        });
+    });
+
+});
+</script>

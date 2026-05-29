@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>能量监测窗 - 语文魔方</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        body {
+            background-color: #f5f7fa;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .logo img {
+            width: 36px;
+            height: 36px;
+        }
+        .nav {
+            display: flex;
+            gap: 25px;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+        .nav a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .user-info:hover {
+            opacity: 0.8;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .username {
+            font-size: 14px;
+            color: white;
+        }
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .logout-btn:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .page-title {
+            font-size: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            color: #303133;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        .info-cards-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .info-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #f0f4ff;
+        }
+        .info-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .info-card-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #303133;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            background: linear-gradient(135deg, rgba(103, 194, 58, 0.1) 0%, rgba(103, 194, 58, 0.2) 100%);
+            color: #67c23a;
+        }
+        .energy-hearts {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .heart {
+            font-size: 20px;
+            color: #f56c6c;
+        }
+        .heart.empty {
+            color: #e0e0e0;
+        }
+        .rating-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+        .rating-item {
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            opacity: 0.5;
+        }
+        .rating-item.active {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .rating-emoji {
+            font-size: 36px;
+            margin-bottom: 5px;
+        }
+        .rating-label {
+            font-size: 12px;
+            color: #606266;
+        }
+        .score-display {
+            text-align: center;
+            padding: 40px 0;
+        }
+        .score-value {
+            font-size: 72px;
+            font-weight: bold;
+            margin: 20px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .score-label {
+            font-size: 18px;
+            color: #606266;
+            margin-top: 10px;
+        }
+        .norm-reference {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .norm-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #303133;
+        }
+        .norm-info {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+        }
+        .norm-item {
+            text-align: center;
+        }
+        .norm-item-label {
+            font-size: 14px;
+            color: #606266;
+            margin-bottom: 5px;
+        }
+        .norm-item-value {
+            font-size: 18px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .norm-range {
+            text-align: center;
+            padding: 15px;
+            background-color: white;
+            border-radius: 6px;
+            font-size: 16px;
+            color: #606266;
+            border: 2px solid #f0f4ff;
+        }
+        .norm-range-value {
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .evaluation-result {
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .evaluation-result.low {
+            background-color: #fef0f0;
+            color: #f56c6c;
+        }
+        .evaluation-result.normal {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            color: #667eea;
+        }
+        .evaluation-result.high {
+            background-color: #f0f9ff;
+            color: #67c23a;
+        }
+        .stats-cards-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 2px solid #f0f4ff;
+        }
+        .stat-card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #606266;
+        }
+        .stat-card-icon {
+            font-size: 18px;
+        }
+        .stat-card-value {
+            font-size: 32px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .analysis-section {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #f0f4ff;
+        }
+        .analysis-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #303133;
+        }
+        .analysis-content {
+            color: #606266;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        .suggestion-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .suggestion-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #303133;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .no-data {
+            text-align: center;
+            padding: 60px 0;
+            color: #909399;
+            font-size: 18px;
+        }
+        .data-table th {
+            color: #606266;
+            font-weight: bold;
+        }
+        .data-table td {
+            color: #303133;
+        }
+        .data-table tr:hover {
+            background-color: #f5f7fa;
+        }
+        .btn {
+            padding: 15px 40px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 16px;
+            display: inline-block;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <div class="logo">
+            <img th:src="@{/images/微信图片_20260405124109.png}" alt="Logo" onerror="this.style.display='none'">
+            <span>语文魔方</span>
+        </div>
+        <div class="nav">
+            <a th:href="@{/}">首页</a>
+            <a th:href="@{/forum}">班级留言板</a>
+            <a th:href="@{/energy}" style="background-color: rgba(255, 255, 255, 0.2);">能量监测窗</a>
+            <a th:href="@{/questionnaire}">心理问卷评估</a>
+            <a th:href="@{/diagnosis/personal}">学情诊断报告</a>
+            <a th:if="${user != null && user.role == 'admin'}" th:href="@{/energy/admin}">全班数据</a>
+        </div>
+    </div>
+    <div class="header-right">
+        <div class="user-info" onclick="window.location.href='/profile'">
+            <div class="user-avatar">👤</div>
+            <span class="username" th:if="${user != null}">
+                <span th:if="${user.role == 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '老师'"></span>
+                <span th:if="${user.role == 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '老师'"></span>
+                <span th:if="${user.role != 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '同学'"></span>
+                <span th:if="${user.role != 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '同学'"></span>
+            </span>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="page-header">
+        <span style="font-size: 24px;">📊</span>
+        <h1 class="page-title">能量监测窗</h1>
+    </div>
+
+    <!-- 主要评估结果卡片 -->
+    <div class="card" th:if="${latestData != null && latestData.cdRiscScore != null}">
+        <h2 style="text-align: center; margin-bottom: 30px;">
+            <span th:if="${isLatestPostIntervention}">📊 干预后评估结果</span>
+            <span th:unless="${isLatestPostIntervention}">📝 干预前评估结果</span>
+        </h2>
+
+        <div class="score-display">
+            <div class="score-label">
+                <span th:text="${user.name != null ? user.name : user.username}"></span> 同学的心理健康评估总分（满分 100 分）
+            </div>
+            <div class="score-value" th:text="${totalScore}">74</div>
+            <div class="score-label">基于 25 道 CD-RISC 量表题目（0-100 分标准化计分）</div>
+        </div>
+
+        <div class="norm-reference">
+            <div class="norm-title">
+                <span th:if="${user.gender == 'male'}">男性常模参考</span>
+                <span th:if="${user.gender == 'female'}">女性常模参考</span>
+            </div>
+
+            <div class="norm-info">
+                <div class="norm-item">
+                    <div class="norm-item-label">常模平均值</div>
+                    <div class="norm-item-value" th:text="${#numbers.formatDecimal(norm.mean, 1, 2)}"></div>
+                </div>
+                <div class="norm-item">
+                    <div class="norm-item-label">标准差</div>
+                    <div class="norm-item-value" th:text="${#numbers.formatDecimal(norm.stdDev, 1, 2)}"></div>
+                </div>
+            </div>
+
+            <div class="norm-range">
+                正常范围：
+                <span class="norm-range-value" th:text="${#numbers.formatDecimal(norm.lowerBound, 1, 2)} + ' ~ ' + ${#numbers.formatDecimal(norm.upperBound, 1, 2)}"></span>
+            </div>
+
+            <div class="evaluation-result"
+                 th:class="${totalScore < norm.lowerBound} ? 'low' : (${totalScore > norm.upperBound} ? 'high' : 'normal')">
+                <span th:if="${totalScore < norm.lowerBound}">⚠️ 您的得分低于常模范围，建议关注心理健康</span>
+                <span th:if="${totalScore >= norm.lowerBound and totalScore <= norm.upperBound}">✓ 您的得分在常模范围内，心理状态良好</span>
+                <span th:if="${totalScore > norm.upperBound}">🌟 您的得分高于常模范围，心理弹性优秀</span>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #f0f2f5;">
+            <h3 style="color: #303133; margin-bottom: 15px;">🔄 需要重新评估？</h3>
+            <p style="color: #606266; margin-bottom: 20px;">您可以重新填写问卷，更新评估结果</p>
+            <a th:href="@{/questionnaire/start(intervention='post')}" class="btn btn-primary">
+                📝 重新填写干预后问卷
+            </a>
+        </div>
+    </div>
+
+    <div class="card" th:if="${latestData == null || latestData.cdRiscScore == null}">
+        <div class="no-data">
+            <p>暂无问卷评分数据</p>
+            <p style="margin-top: 10px; font-size: 16px;">请先完成心理问卷评估</p>
+            <a th:href="@{/questionnaire/start}" class="btn btn-primary" style="margin-top: 20px;">去填写问卷（干预前）</a>
+        </div>
+    </div>
+
+    <!-- 趋势图表卡片 -->
+    <div class="card" id="trendChartCard">
+        <h2 style="margin-bottom: 20px;">📈 心理状态变化趋势</h2>
+        <div id="trendChart" style="width: 100%; height: 400px;"></div>
+        <div style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 6px;">
+            <h4 style="margin-bottom: 10px; color: #303133;">💡 图表说明</h4>
+            <ul style="color: #606266; line-height: 1.8;">
+                <li>🔵 蓝色折线：每次评估的实际得分</li>
+                <li>🔴 红色虚线：干预前平均得分（所有干预前数据的平均值）</li>
+                <li>🟢 绿色虚线：干预后平均得分（所有干预后数据的平均值）</li>
+                <li>⬜ 灰色区域：常模参考范围（正常心理弹性水平）</li>
+                <li>通过对比可以直观看到干预前后的整体状态变化和进步情况</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 填写记录表格 -->
+    <div class="card">
+        <h2 style="margin-bottom: 20px;">📝 填写记录</h2>
+        <div th:if="${historyData != null and !#lists.isEmpty(historyData)}">
+            <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                <tr style="background-color: #f5f7fa;">
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ebeef5;">填写时间</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ebeef5;">干预状态</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ebeef5;">得分</th>
+                    <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ebeef5;">状态</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="data : ${historyData}" style="border-bottom: 1px solid #ebeef5;">
+                    <td style="padding: 12px;" th:text="${#temporals.format(data.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td style="padding: 12px;">
+                        <span th:if="${data.interventionStatus == 'PRE_INTERVENTION'}" style="color: #909399;">干预前</span>
+                        <span th:if="${data.interventionStatus == 'POST_INTERVENTION'}" style="color: #e6a23c; font-weight: bold;">干预后</span>
+                    </td>
+                    <td style="padding: 12px;">
+                            <span th:text="${data.cdRiscScore}"
+                                  th:styleappend="${data.cdRiscScore < normLowerBound} ? 'color: #f56c6c; font-weight: bold;' : (${data.cdRiscScore > normUpperBound} ? 'color: #67c23a; font-weight: bold;' : '')"></span>
+                    </td>
+                    <td style="padding: 12px;">
+                            <span th:if="${data.cdRiscScore >= normLowerBound and data.cdRiscScore <= normUpperBound}"
+                                  style="color: #67c23a; font-weight: bold;">✓ 正常</span>
+                        <span th:if="${data.cdRiscScore < normLowerBound}"
+                              style="color: #f56c6c; font-weight: bold;">✗ 偏低</span>
+                        <span th:if="${data.cdRiscScore > normUpperBound}"
+                              style="color: #67c23a; font-weight: bold;">✓ 优秀</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div th:if="${historyData == null or #lists.isEmpty(historyData)}" style="text-align: center; padding: 40px 0; color: #909399;">
+            <p>暂无填写记录</p>
+            <a th:href="@{/questionnaire/start}" class="btn btn-primary" style="margin-top: 15px; padding: 10px 25px; font-size: 14px;">去填写第一份问卷</a>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // 页面加载完成后初始化图表
+    document.addEventListener('DOMContentLoaded', function() {
+        // 直接初始化图表，不再检查表格
+        loadTrendData();
+    });
+
+    // 加载趋势数据
+    function loadTrendData() {
+        var normLowerBoundVar = /*[[${normLowerBound}]]*/ 55.1;
+        var normUpperBoundVar = /*[[${normUpperBound}]]*/ 83.83;
+
+        fetch('/energy/trend-data')
+            .then(response => response.json())
+            .then(data => {
+                console.log('获取到的数据:', data);
+
+                if (data.success && data.labels && data.labels.length > 0) {
+                    // 显示图表卡片
+                    document.getElementById('trendChartCard').style.display = 'block';
+
+                    // 浮点数处理
+                    const normLower = parseFloat(normLowerBoundVar.toFixed(2));
+                    const normUpper = parseFloat(normUpperBoundVar.toFixed(2));
+
+                    // 计算平均值
+                    let preSum = 0, preCount = 0;
+                    let postSum = 0, postCount = 0;
+
+                    for (let i = 0; i < data.scores.length; i++) {
+                        if (data.statuses[i] === 'PRE_INTERVENTION') {
+                            preSum += data.scores[i];
+                            preCount++;
+                        } else if (data.statuses[i] === 'POST_INTERVENTION') {
+                            postSum += data.scores[i];
+                            postCount++;
+                        }
+                    }
+
+                    const preAverage = preCount > 0 ? parseFloat((preSum / preCount).toFixed(1)) : null;
+                    const postAverage = postCount > 0 ? parseFloat((postSum / postCount).toFixed(1)) : null;
+
+                    // 根据状态匹配节点颜色
+                    const pointColors = data.scores.map((score, index) => {
+                        return data.statuses[index] === 'PRE_INTERVENTION' ? '#909399' : '#e6a23c';
+                    });
+
+                    // 构建图例
+                    const legendData = ['实际得分', '常模范围'];
+                    if (preAverage !== null) legendData.push('干预前平均');
+                    if (postAverage !== null) legendData.push('干预后平均');
+
+                    // 区域与线数据
+                    const markAreaData = [
+                        {
+                            name: '常模范围',
+                            yAxis: normLower,
+                            label: {
+                                show: true,
+                                position: 'insideTop',
+                                formatter: '常模参考范围\n(' + normLower + ' ~ ' + normUpper + ')',
+                                color: '#606266',
+                                fontSize: 12,
+                                distance: 10
+                            }
+                        },
+                        { yAxis: normUpper }
+                    ];
+
+                    const markLinePre = [];
+                    if (preAverage !== null) {
+                        markLinePre.push({
+                            name: '干预前平均',
+                            yAxis: preAverage,
+                            lineStyle: { color: '#f56c6c', width: 2, type: 'dashed' },
+                            label: { formatter: '干预前平均：{c}', color: '#f56c6c', fontWeight: 'bold' }
+                        });
+                    }
+
+                    const markLinePost = [];
+                    if (postAverage !== null) {
+                        markLinePost.push({
+                            name: '干预后平均',
+                            yAxis: postAverage,
+                            lineStyle: { color: '#67c23a', width: 2, type: 'dashed' },
+                            label: { formatter: '干预后平均：{c}', color: '#67c23a', fontWeight: 'bold' }
+                        });
+                    }
+
+                    // 各系列配置
+                    const seriesConfig = [
+                        {
+                            name: '实际得分',
+                            type: 'line',
+                            data: data.scores,
+                            smooth: true,
+                            lineStyle: { width: 3, color: '#667eea' },
+                            itemStyle: {
+                                color: function(params) { return pointColors[params.dataIndex]; },
+                                borderWidth: 3
+                            },
+                            symbolSize: 10,
+                            areaStyle: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                    { offset: 0, color: 'rgba(102, 126, 234, 0.3)' },
+                                    { offset: 1, color: 'rgba(102, 126, 234, 0.05)' }
+                                ])
+                            }
+                        },
+                        {
+                            name: '常模范围',
+                            type: 'line',
+                            data: [],
+                            itemStyle: { color: '#c0c4cc' },
+                            markArea: {
+                                silent: true,
+                                itemStyle: { color: 'rgba(144, 147, 153, 0.25)' },
+                                label: {
+                                    show: true,
+                                    position: 'top',
+                                    formatter: '常模参考范围\n(' + normLower + ' ~ ' + normUpper + ')',
+                                    color: '#606266',
+                                    fontSize: 13,
+                                    fontWeight: 'bold',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    padding: [5, 10],
+                                    borderRadius: 4,
+                                    borderColor: '#e0e0e0',
+                                    borderWidth: 1
+                                },
+                                data: [
+                                    [
+                                        {
+                                            name: '常模参考范围',
+                                            yAxis: normLower,
+                                            xAxis: data.labels[0]
+                                        },
+                                        {
+                                            yAxis: normUpper,
+                                            xAxis: data.labels[data.labels.length - 1]
+                                        }
+                                    ]
+                                ]
+                            }
+                        }
+                    ];
+
+                    if (preAverage !== null) {
+                        seriesConfig.push({
+                            name: '干预前平均',
+                            type: 'line',
+                            data: [],
+                            itemStyle: { color: '#f56c6c' },
+                            markLine: { silent: false, symbol: 'none', data: markLinePre }
+                        });
+                    }
+
+                    if (postAverage !== null) {
+                        seriesConfig.push({
+                            name: '干预后平均',
+                            type: 'line',
+                            data: [],
+                            itemStyle: { color: '#67c23a' },
+                            markLine: { silent: false, symbol: 'none', data: markLinePost }
+                        });
+                    }
+
+                    // 延迟初始化确保 DOM 已准备好
+                    setTimeout(function() {
+                        const chart = echarts.init(document.getElementById('trendChart'));
+
+                        const option = {
+                            title: {
+                                text: 'CD-RISC 得分变化趋势',
+                                left: 'center',
+                                textStyle: { fontSize: 16, color: '#303133' }
+                            },
+                            tooltip: {
+                                trigger: 'axis',
+                                formatter: function(params) {
+                                    const actualData = params.find(p => p.seriesName === '实际得分');
+                                    if (!actualData) return '';
+
+                                    const dataIndex = actualData.dataIndex;
+                                    const status = data.statuses[dataIndex] === 'PRE_INTERVENTION' ? '干预前' : '干预后';
+
+                                    let result = '<div style="font-weight: bold; margin-bottom: 5px;">' + actualData.name + '</div>';
+                                    result += actualData.marker + '得分：' + actualData.value + '<br/>';
+
+                                    let statusColor = status === '干预前' ? '#909399' : '#e6a23c';
+                                    result += '<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:' + statusColor + ';"></span> 状态：' + status + '<br/>';
+
+                                    if (preAverage !== null) {
+                                        result += '<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:#f56c6c;"></span> 干预前平均：' + preAverage + '<br/>';
+                                    }
+                                    if (postAverage !== null) {
+                                        result += '<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:#67c23a;"></span> 干预后平均：' + postAverage;
+                                    }
+                                    return result;
+                                }
+                            },
+                            legend: {
+                                data: legendData,
+                                bottom: 10
+                            },
+                            grid: {
+                                left: '3%',
+                                right: '12%',
+                                bottom: '15%',
+                                containLabel: true
+                            },
+                            xAxis: {
+                                type: 'category',
+                                boundaryGap: false,
+                                data: data.labels,
+                                axisLabel: {
+                                    rotate: 45,
+                                    interval: 'auto',
+                                    formatter: function (value) {
+                                        return value.substring(5, 16);
+                                    }
+                                }
+                            },
+                            yAxis: {
+                                type: 'value',
+                                name: '得分',
+                                min: 0,
+                                max: 100,
+                                interval: 10
+                            },
+                            series: seriesConfig
+                        };
+
+                        chart.setOption(option);
+
+                        chart.on('click', function (params) {
+                            let targetSeriesName = null;
+                            if (params.componentType === 'series') {
+                                targetSeriesName = params.seriesName;
+                            }
+                            else if (params.componentType === 'markLine' || params.componentType === 'markArea') {
+                                targetSeriesName = params.seriesName;
+                            }
+
+                            if (targetSeriesName) {
+                                chart.dispatchAction({
+                                    type: 'legendToggleSelect',
+                                    name: targetSeriesName
+                                });
+                            }
+                        });
+
+                        window.addEventListener('resize', function() {
+                            chart.resize();
+                        });
+                    }, 300);
+
+                } else {
+                    console.log('没有数据或数据格式不正确');
+                    // 如果没有数据，隐藏图表卡片
+                    document.getElementById('trendChartCard').style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('加载趋势数据失败:', error);
+                // 出错时隐藏图表
+                document.getElementById('trendChartCard').style.display = 'none';
+            });
+    }
+</script>
+</body>
+</html>

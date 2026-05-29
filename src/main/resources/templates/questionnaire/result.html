@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>心理评估结果 - 语文魔方</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        body {
+            background-color: #f5f7fa;
+        }
+        .header {
+            background-color: #409eff;
+            color: white;
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .user-info:hover {
+            opacity: 0.8;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .username {
+            font-size: 14px;
+            color: white;
+        }
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .logout-btn:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+        .result-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .result-title {
+            font-size: 24px;
+            color: #303133;
+            margin-bottom: 10px;
+        }
+        .result-desc {
+            color: #606266;
+            font-size: 16px;
+        }
+        .chart-container {
+            height: 400px;
+            margin: 30px 0;
+        }
+        .dimension-result {
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 6px;
+            background-color: #f8f9fa;
+        }
+        .dimension-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .dimension-score {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .dimension-desc {
+            color: #606266;
+            line-height: 1.6;
+        }
+        .btn {
+            padding: 12px 25px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 16px;
+            display: inline-block;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background-color: #409eff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #66b1ff;
+        }
+        .btn-secondary {
+            background-color: #909399;
+            color: white;
+            margin-left: 15px;
+        }
+        .btn-secondary:hover {
+            background-color: #a6a9ad;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>语文魔方</h1>
+    <div class="nav">
+        <a th:href="@{/}">首页</a>
+        <a th:href="@{/questionnaire}">心理问卷评估</a>
+        <a th:href="@{/energy}">能量监测窗</a>
+        <a th:href="@{/forum}">班级留言板</a>
+        <a th:href="@{/diagnosis/personal}">个人学情诊断报告</a>
+    </div>
+    <div class="header-right">
+        <div class="user-info" onclick="window.location.href='/profile'">
+            <div class="user-avatar">👤</div>
+            <span class="username" th:if="${user != null}">
+                <span th:if="${user.role == 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '老师'"></span>
+                <span th:if="${user.role == 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '老师'"></span>
+                <span th:if="${user.role != 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '同学'"></span>
+                <span th:if="${user.role != 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '同学'"></span>
+            </span>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <div class="result-header">
+            <div class="result-title">您的心理弹性评估结果</div>
+            <div class="result-desc">基于 CD-RISC 心理弹性量表的评估</div>
+        </div>
+
+        <div class="dimension-result" style="text-align: center; margin-bottom: 30px;">
+            <div style="font-size: 24px; color: #606266; margin-bottom: 10px;">
+                <span th:text="${user.name}"></span> 同学
+            </div>
+            <div style="font-size: 48px; font-weight: bold; color: #409eff; margin: 20px 0;">
+                <span th:text="${totalScore}"></span> <span style="font-size: 24px;">/ 70</span>
+            </div>
+            <div style="font-size: 18px; color: #606266;">心理健康评估总分（14 道题）</div>
+        </div>
+
+        <div class="dimension-result"
+             th:style="${totalScore < norm.lowerBound} ? 'background-color: #fef0f0; border-left: 4px solid #f56c6c;' : (${totalScore > norm.upperBound} ? 'background-color: #f0f9ff; border-left: 4px solid #67c23a;' : 'background-color: #f8f9fa; border-left: 4px solid #909399;')">
+            <div style="font-size: 18px; margin-bottom: 15px; font-weight: bold;">
+                <span th:if="${user.gender == 'male'}">男性常模参考</span>
+                <span th:if="${user.gender == 'female'}">女性常模参考</span>
+            </div>
+            <div style="font-size: 16px; color: #606266; margin-bottom: 10px;">
+                常模平均值 ± 标准差：
+                <span th:if="${user.gender == 'male'}" style="font-weight: bold; color: #303133;">51.20 ± 8.80</span>
+                <span th:if="${user.gender == 'female'}" style="font-weight: bold; color: #303133;">49.50 ± 8.50</span>
+            </div>
+            <div style="font-size: 16px; color: #606266; margin-bottom: 15px;">
+                正常范围：
+                <span th:if="${user.gender == 'male'}" style="font-weight: bold;">42.40 ~ 60.00</span>
+                <span th:if="${user.gender == 'female'}" style="font-weight: bold;">41.00 ~ 58.00</span>
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; border-radius: 6px; font-size: 18px; font-weight: bold;"
+                 th:style="${totalScore < norm.lowerBound} ? 'color: #f56c6c; background-color: rgba(245, 108, 108, 0.1);' : (${totalScore > norm.upperBound} ? 'color: #67c23a; background-color: rgba(103, 194, 58, 0.1);' : 'color: #303133; background-color: rgba(0, 0, 0, 0.05);')">
+                <span th:if="${totalScore < norm.lowerBound}">⚠️ 您的得分低于常模范围，建议关注心理健康</span>
+                <span th:if="${totalScore >= norm.lowerBound and totalScore <= norm.upperBound}">✓ 您的得分在常模范围内，心理状态良好</span>
+                <span th:if="${totalScore > norm.upperBound}">🌟 您的得分高于常模范围，心理弹性优秀</span>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a th:href="@{/questionnaire}" class="btn btn-primary">返回问卷列表</a>
+            <a th:href="@{/energy}" class="btn btn-secondary">查看能量监测</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 准备雷达图数据
+        const dimensionNames = [];
+        const dimensionScores = [];
+        const dimensionColors = ['#f56c6c', '#409eff', '#67c23a', '#e6a23c'];
+
+        // 根据后端传来的数据构建图表
+        const dimensionMap = {
+            'ANXIETY': '焦虑水平',
+            'MOTIVATION': '学习积极性',
+            'FOCUS': '专注能力',
+            'OVERALL': '整体状态'
+        };
+
+        // 从Thymeleaf变量中获取数据
+        const dimensionData = /*[[${dimensionScores}]]*/ {};
+
+        Object.keys(dimensionData).forEach((key, index) => {
+            dimensionNames.push(dimensionMap[key] || key);
+            dimensionScores.push(parseFloat(dimensionData[key]).toFixed(1));
+        });
+
+        // 初始化雷达图
+        const chart = echarts.init(document.getElementById('radarChart'));
+
+        const option = {
+            title: {
+                text: '心理状态雷达图',
+                left: 'center',
+                textStyle: {
+                    fontSize: 18,
+                    color: '#303133'
+                }
+            },
+            radar: {
+                indicator: dimensionNames.map((name, index) => ({
+                    name: name,
+                    max: 5
+                })),
+                radius: '60%',
+                splitNumber: 5,
+                axisName: {
+                    color: '#606266',
+                    fontSize: 14
+                }
+            },
+            series: [{
+                type: 'radar',
+                data: [{
+                    value: dimensionScores,
+                    name: '您的得分',
+                    itemStyle: {
+                        color: '#409eff'
+                    },
+                    areaStyle: {
+                        opacity: 0.3
+                    }
+                }],
+                symbolSize: 8
+            }],
+            tooltip: {
+                trigger: 'item',
+                formatter: function(params) {
+                    let result = params.name + '<br/>';
+                    params.value.forEach((value, index) => {
+                        result += dimensionNames[index] + ': ' + value + '/5.0<br/>';
+                    });
+                    return result;
+                }
+            }
+        };
+
+        chart.setOption(option);
+
+        // 窗口大小改变时重绘图表
+        window.addEventListener('resize', function() {
+            chart.resize();
+        });
+    });
+</script>
+</body>
+</html>

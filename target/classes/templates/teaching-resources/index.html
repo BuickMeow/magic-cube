@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>教学资源库 - 语文魔方</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft YaHei", sans-serif; }
+        body {
+            background: linear-gradient(180deg, #e8f4ff 0%, #f5f7fa 100%);
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .logo img {
+            width: 32px;
+            height: 32px;
+        }
+        .nav { display: flex; gap: 25px; }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+        .nav a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .nav a.active {
+            background-color: rgba(255, 255, 255, 0.3);
+            font-weight: bold;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .user-info:hover {
+            opacity: 0.8;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .username {
+            font-size: 14px;
+            color: white;
+        }
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .logout-btn:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f4ff;
+            margin-bottom: 25px;
+        }
+        .section-title {
+            font-size: 22px;
+            color: #2c3e50;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title::before {
+            content: "";
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+        .add-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s;
+        }
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+        .resource-meta {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        .resource-meta span {
+            color: #667eea;
+            font-weight: bold;
+        }
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        .resource-item {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid #f0f4ff;
+            position: relative;
+        }
+        .resource-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+            border-color: #667eea;
+        }
+        .delete-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #f56c6c;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.7;
+            transition: all 0.3s;
+        }
+        .delete-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .resource-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            background: white;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 2px solid #f0f4ff;
+        }
+        .resource-title {
+            font-size: 17px;
+            color: #2c3e50;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .resource-count {
+            font-size: 13px;
+            color: #999;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        .modal {
+            background: white;
+            padding: 35px;
+            border-radius: 16px;
+            width: 450px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        .modal-title {
+            font-size: 20px;
+            color: #2c3e50;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+        .modal-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 25px;
+            transition: all 0.3s;
+        }
+        .modal-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        .modal-btn {
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .modal-btn.cancel {
+            background: #f5f7fa;
+            color: #606266;
+            border: 2px solid #e0e0e0;
+        }
+        .modal-btn.cancel:hover {
+            background: #e4e7ed;
+        }
+        .modal-btn.confirm {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        .modal-btn.confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <div class="logo">
+            <img th:src="@{/images/微信图片_20260405124109.png}" alt="Logo" onerror="this.style.display='none'">
+            <span>语文魔方</span>
+        </div>
+        <div class="nav">
+            <a th:href="@{/}">首页</a>
+            <a th:href="@{/energy/admin}">课堂数据看板</a>
+            <a th:href="@{/forum}">班级留言板</a>
+            <a th:href="@{/diagnosis/class}">学情诊断报告</a>
+            <a th:href="@{/teaching-resources}" class="active">教学资源库</a>
+        </div>
+    </div>
+    <div class="header-right">
+        <div class="user-info" onclick="window.location.href='/profile'">
+            <div class="user-avatar">👤</div>
+            <span class="username" th:if="${user != null}">
+                <span th:if="${user.role == 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '老师'"></span>
+                <span th:if="${user.role == 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '老师'"></span>
+                <span th:if="${user.role != 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '同学'"></span>
+                <span th:if="${user.role != 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '同学'"></span>
+            </span>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <div class="section-header">
+            <h2 class="section-title">📚 教学资源库</h2>
+            <button onclick="showAddModal()" class="add-btn">+ 新建课文文件夹</button>
+        </div>
+
+        <p class="resource-meta">共有 <span th:text="${#lists.size(resources)}"></span> 篇课文的教学资源</p>
+
+        <div class="resource-grid">
+            <div class="resource-item" th:each="resource : ${resources}">
+                <form th:action="@{/teaching-resources/delete-lesson/{id}(id=${resource.id})}" method="post">
+                    <button type="submit" onclick="return confirm('警告：删除此课文将同时删除电脑上对应的文件夹以及里面的所有文件！确定要删除吗？')" class="delete-btn">🗑️</button>
+                </form>
+
+                <a th:href="@{/teaching-resources/{id}(id=${resource.id})}" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="resource-icon">📖</div>
+                    <div class="resource-title" th:text="${resource.title}"></div>
+                    <div class="resource-count">进入资源库</div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="addModal">
+    <div class="modal">
+        <h3 class="modal-title">📝 新建课文文件夹</h3>
+        <form th:action="@{/teaching-resources/add-lesson}" method="post">
+            <input type="text" name="title" class="modal-input" placeholder="请输入课文标题（如：《背影》）" required>
+            <div class="modal-actions">
+                <button type="button" onclick="hideAddModal()" class="modal-btn cancel">取消</button>
+                <button type="submit" class="modal-btn confirm">确定创建</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showAddModal() {
+        document.getElementById('addModal').classList.add('show');
+    }
+    function hideAddModal() {
+        document.getElementById('addModal').classList.remove('show');
+    }
+
+    // 点击遮罩层关闭弹窗
+    document.getElementById('addModal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            hideAddModal();
+        }
+    });
+
+    // ESC 键关闭弹窗
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            hideAddModal();
+        }
+    });
+</script>
+
+</div>
+</body>
+</html>

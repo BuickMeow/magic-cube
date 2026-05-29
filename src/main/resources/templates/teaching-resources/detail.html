@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${resource.title} + ' - 教学资源库'">课文详情</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft YaHei", sans-serif; }
+        body {
+            background: linear-gradient(180deg, #e8f4ff 0%, #f5f7fa 100%);
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .logo img {
+            width: 32px;
+            height: 32px;
+        }
+        .nav {
+            display: flex;
+            gap: 25px;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+        .nav a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .nav a.active {
+            background-color: rgba(255, 255, 255, 0.3);
+            font-weight: bold;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .username {
+            font-size: 14px;
+            color: white;
+        }
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .logout-btn:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+        }
+        .card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        /* 顶部操作栏 */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f4ff;
+        }
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .toolbar h2 {
+            margin: 0;
+            font-size: 22px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        .btn-group { display: flex; gap: 10px; }
+        .btn {
+            padding: 12px 24px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #67c23a 0%, #52b360 100%);
+        }
+        .btn-back {
+            background: linear-gradient(135deg, #e6a23c 0%, #f0b359 100%);
+        }
+        .btn-back-orange {
+            background: linear-gradient(135deg, #e6a23c 0%, #f0b359 100%);
+        }
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 列表样式 */
+        .file-list { list-style: none; }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #f0f2f5;
+            transition: all 0.3s;
+            border-radius: 8px;
+        }
+        .file-item:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.02) 0%, rgba(118, 75, 162, 0.02) 100%);
+        }
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+            text-decoration: none;
+            color: inherit;
+        }
+        .file-icon {
+            font-size: 32px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-radius: 12px;
+        }
+        .file-name {
+            font-size: 16px;
+            color: #2c3e50;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .file-name:hover {
+            color: #667eea;
+        }
+        .file-size {
+            font-size: 13px;
+            color: #909399;
+            margin-top: 5px;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .btn-danger {
+            background: none;
+            color: #f56c6c;
+            border: 2px solid #f56c6c;
+            padding: 8px 16px;
+        }
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #f56c6c 0%, #f78989 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: white;
+            padding: 35px;
+            border-radius: 16px;
+            width: 450px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        .modal-content h3 {
+            margin-bottom: 25px;
+            color: #2c3e50;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .modal-input {
+            width: 100%;
+            padding: 14px 16px;
+            margin-bottom: 25px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .modal-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .empty-folder {
+            text-align: center;
+            padding: 50px 20px;
+            color: #909399;
+            font-size: 15px;
+        }
+        .empty-folder-icon {
+            font-size: 72px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <div class="logo">
+            <img th:src="@{/images/微信图片_20260405124109.png}" alt="Logo" onerror="this.style.display='none'">
+            <span>语文魔方</span>
+        </div>
+        <div class="nav">
+            <a th:href="@{/}">首页</a>
+            <a th:href="@{/teaching-resources}" class="active">教学资源库</a>
+        </div>
+    </div>
+    <div class="header-right">
+        <div class="user-info" onclick="window.location.href='/profile'">
+            <div class="user-avatar">👤</div>
+            <span class="username" th:if="${user != null}">
+                <span th:if="${user.role == 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '老师'"></span>
+                <span th:if="${user.role == 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '老师'"></span>
+                <span th:if="${user.role != 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '同学'"></span>
+                <span th:if="${user.role != 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '同学'"></span>
+            </span>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <a th:if="${currentParentId == 0}" th:href="@{/teaching-resources}" class="btn btn-back">返回全部课文</a>
+                <a th:if="${currentParentId > 0}" th:href="@{/teaching-resources/{id}(id=${resource.id})}" class="btn btn-back-orange">返回课文目录</a>
+
+                <h2>
+                    <span th:text="${resource.title}"></span>
+                    <span th:if="${currentFolder != null}" th:text="' / ' + ${currentFolder.fileName}" style="color: #606266; font-size: 16px;"></span>
+                </h2>
+            </div>
+
+            <div class="btn-group">
+                <button onclick="showModal('folderModal')" class="btn btn-primary">📁 新建文件夹</button>
+                <button onclick="showModal('uploadModal')" class="btn btn-success">☁️ 上传文件</button>
+            </div>
+        </div>
+
+        <ul class="file-list">
+            <li th:if="${#lists.isEmpty(files)}" class="empty-folder">
+                <div class="empty-folder-icon">📂</div>
+                <div>此文件夹为空，快点击右上角上传文件吧！</div>
+            </li>
+
+            <li class="file-item" th:each="file : ${files}">
+                <a th:if="${file.fileType == 'folder'}" th:href="@{/teaching-resources/{id}/folder/{folderId}(id=${resource.id}, folderId=${file.id})}" class="file-info">
+                    <span class="file-icon">📁</span>
+                    <div>
+                        <div class="file-name" th:text="${file.fileName}"></div>
+                        <div class="file-size">文件夹</div>
+                    </div>
+                </a>
+
+                <div th:if="${file.fileType != 'folder'}" class="file-info" style="cursor: default;">
+                    <span class="file-icon" th:text="${file.fileType == 'video'} ? '🎥' : '📄'"></span>
+                    <div>
+                        <div class="file-name" th:text="${file.fileName}" style="color: #303133; pointer-events: none;"></div>
+                        <div class="file-size" th:if="${file.fileSize != null}" th:text="${#numbers.formatDecimal(file.fileSize / 1024.0, 1, 2)} + ' KB'"></div>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <a th:if="${file.fileType != 'folder'}" th:href="@{/teaching-resources/{id}/download/{fileId}(id=${resource.id}, fileId=${file.id})}" class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;">下载</a>
+
+                    <form th:action="@{/teaching-resources/{id}/delete-item(id=${resource.id})}" method="post" style="margin: 0;">
+                        <input type="hidden" name="itemId" th:value="${file.id}">
+                        <input type="hidden" name="parentId" th:value="${currentParentId}">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('确定要永久删除吗？如果是文件夹，里面的所有内容也会被清空！')">🗑️ 删除</button>
+                    </form>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div id="folderModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 20px;">📁 新建文件夹</h3>
+        <form th:action="@{/teaching-resources/{id}/create-folder(id=${resource.id})}" method="post">
+            <input type="hidden" name="parentId" th:value="${currentParentId}">
+            <input type="text" name="folderName" class="modal-input" placeholder="请输入文件夹名称" required>
+            <div style="display: flex; justify-content: space-between;">
+                <button type="button" onclick="hideModal('folderModal')" class="btn" style="border: 1px solid #dcdfe6; color: #606266;">取消</button>
+                <button type="submit" class="btn btn-primary">确定创建</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="uploadModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 20px;">☁️ 上传文件</h3>
+        <form th:action="@{/teaching-resources/{id}/upload-file(id=${resource.id})}" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="parentId" th:value="${currentParentId}">
+            <input type="file" name="file" class="modal-input" required>
+            <div style="display: flex; justify-content: space-between;">
+                <button type="button" onclick="hideModal('uploadModal')" class="btn" style="border: 1px solid #dcdfe6; color: #606266;">取消</button>
+                <button type="submit" class="btn btn-success">开始上传</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function showModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function hideModal(id) { document.getElementById(id).style.display = 'none'; }
+</script>
+</body>
+</html>

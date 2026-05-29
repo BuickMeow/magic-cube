@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>心理问卷 - 语文魔方</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        body {
+            background: linear-gradient(180deg, #e8f4ff 0%, #f5f7fa 100%);
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .logo img {
+            width: 32px;
+            height: 32px;
+        }
+        .nav {
+            display: flex;
+            gap: 25px;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+        .nav a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .user-info:hover {
+            opacity: 0.8;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .username {
+            font-size: 14px;
+            color: white;
+        }
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .logout-btn:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .page-desc {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+        .questionnaire-icon {
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .questionnaire-item {
+            background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        .questionnaire-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+        .questionnaire-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .questionnaire-title::before {
+            content: "📋";
+            font-size: 24px;
+        }
+        .questionnaire-desc {
+            color: #606266;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            font-size: 14px;
+        }
+        .questionnaire-meta {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #666;
+            background: #f8f9fa;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+        .meta-item::before {
+            font-size: 16px;
+        }
+        .meta-item.time::before {
+            content: "⏱️";
+        }
+        .meta-item.score::before {
+            content: "📊";
+        }
+        .meta-item.level::before {
+            content: "🎯";
+        }
+        .btn {
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 15px;
+            display: inline-block;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        .info-box {
+            background: linear-gradient(135deg, #e8f4ff 0%, #f0f7ff 100%);
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 25px;
+        }
+        .info-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .info-title::before {
+            content: "💡";
+            font-size: 20px;
+        }
+        .info-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        .info-list li {
+            padding: 8px 0;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            position: relative;
+            padding-left: 20px;
+        }
+        .info-list li::before {
+            content: "•";
+            color: #667eea;
+            font-size: 18px;
+            position: absolute;
+            left: 0;
+            top: 6px;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <div class="logo">
+            <img th:src="@{/images/微信图片_20260405124109.png}" alt="Logo" onerror="this.style.display='none'">
+            <span>语文魔方</span>
+        </div>
+        <div class="nav">
+            <a th:href="@{/}">首页</a>
+            <th:block th:if="${user != null && user.role != 'admin'}">
+                <a th:href="@{/forum}">班级留言板</a>
+                <a th:href="@{/energy}">能量检测窗</a>
+                <a th:href="@{/questionnaire}" style="background-color: rgba(255, 255, 255, 0.2);">心理问卷评估</a>
+                <a th:href="@{/diagnosis/personal}">学情诊断报告</a>
+            </th:block>
+            <th:block th:if="${user != null && user.role == 'admin'}">
+                <a th:href="@{/energy/admin}">课堂数据看板</a>
+                <a th:href="@{/forum}">班级留言板</a>
+                <a th:href="@{/diagnosis/class}">学情诊断报告</a>
+                <a th:href="@{/teaching-resources}">教学资源库</a>
+            </th:block>
+        </div>
+    </div>
+    <div class="header-right">
+        <div class="user-info" onclick="window.location.href='/profile'">
+            <div class="user-avatar">👤</div>
+            <span class="username" th:if="${user != null}">
+                <span th:if="${user.role == 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '老师'"></span>
+                <span th:if="${user.role == 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '老师'"></span>
+                <span th:if="${user.role != 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '同学'"></span>
+                <span th:if="${user.role != 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '同学'"></span>
+            </span>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="page-title">💙 心理弹性评估</div>
+    <div class="page-desc">通过专业的心理量表，科学评估你的心理弹性和应对压力的能力</div>
+
+    <div class="card">
+        <div class="questionnaire-icon">🧩</div>
+        <h2 style="color: #303133; margin-bottom: 15px; text-align: center;">CD-RISC 心理弹性量表（25 题版）</h2>
+        <p style="color: #606266; margin-bottom: 30px; text-align: center; line-height: 1.8;">Connor-Davidson 心理弹性量表是国际通用的心理评估工具，用于测量个体面对逆境、创伤时的适应能力和恢复力。</p>
+
+        <div class="questionnaire-item">
+            <div class="questionnaire-title">CD-RISC 心理弹性评估问卷</div>
+            <div class="questionnaire-desc">本量表包含 25 个问题，采用 5 点计分法（0-4 分），总分范围 0-100 分。分数越高表示心理弹性越强，越能有效应对生活中的压力和挑战。</div>
+
+            <div class="questionnaire-meta">
+                <div class="meta-item time">约需 10-15 分钟</div>
+                <div class="meta-item score">总分 100 分</div>
+                <div class="meta-item level">适合所有人群</div>
+            </div>
+
+            <div style="text-align: center;">
+                <a th:href="@{/questionnaire/start}" class="btn btn-primary">开始评估</a>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <div class="info-title">评估说明</div>
+            <ul class="info-list">
+                <li>请根据您过去一个月的实际情况作答，答案无对错之分</li>
+                <li>每道题都需要认真思考后选择最符合的选项</li>
+                <li>完成后可立即获得评估报告和个性化建议</li>
+                <li>建议定期进行评估，追踪心理状态变化</li>
+                <li>评估结果仅用于自我了解，系统会严格保密</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+// 页面加载完成后的初始化逻辑（如需要）
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('心理问卷页面已加载');
+});
+</script>
+</body>
+</html>

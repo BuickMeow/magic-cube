@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>学情诊断报告 - 语文魔方</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        body {
+            background: linear-gradient(180deg, #e8f4ff 0%, #f5f7fa 100%);
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .logo img {
+            width: 32px;
+            height: 32px;
+        }
+        .nav {
+            display: flex;
+            gap: 25px;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+        .nav a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .user-info:hover {
+            opacity: 0.8;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .username {
+            font-size: 14px;
+            color: white;
+        }
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .logout-btn:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .page-title::before {
+            content: "📊";
+            font-size: 28px;
+        }
+        .page-desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f4ff;
+        }
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title::before {
+            font-size: 24px;
+        }
+        .generate-time {
+            font-size: 13px;
+            color: #999;
+            background: #f8f9fa;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table thead tr {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        }
+        .data-table th {
+            color: #606266;
+            font-weight: bold;
+            padding: 15px;
+            text-align: left;
+            border-bottom: 2px solid #e8e8e8;
+            font-size: 14px;
+        }
+        .data-table td {
+            color: #303133;
+            padding: 15px;
+            border-bottom: 1px solid #f0f2f5;
+            font-size: 14px;
+        }
+        .data-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-badge.pre {
+            background-color: #f0f2f5;
+            color: #606266;
+        }
+        .status-badge.post {
+            background-color: #fdf6ec;
+            color: #e6a23c;
+        }
+        .score-value {
+            font-weight: bold;
+            font-size: 15px;
+        }
+        .score-value.low {
+            color: #f56c6c;
+        }
+        .score-value.normal {
+            color: #606266;
+        }
+        .score-value.high {
+            color: #67c23a;
+        }
+        .btn-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 13px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        .btn-link:hover {
+            background-color: #f0f4ff;
+            text-decoration: none;
+        }
+        .btn-primary {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 15px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        .suggestion-list {
+            list-style: none;
+            line-height: 2;
+            color: #606266;
+        }
+        .suggestion-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        .suggestion-list li::before {
+            content: "•";
+            color: #667eea;
+            font-size: 20px;
+            position: absolute;
+            left: 0;
+            top: 8px;
+        }
+        .alert {
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid;
+        }
+        .alert-info {
+            background-color: #f0f9ff;
+            border-left-color: #409eff;
+            color: #606266;
+        }
+        .alert-warning {
+            background-color: #fdf6ec;
+            border-left-color: #e6a23c;
+            color: #e6a23c;
+        }
+        .alert-danger {
+            background-color: #fef0f0;
+            border-left-color: #f56c6c;
+            color: #f56c6c;
+        }
+        .alert-secondary {
+            background-color: #f0f4ff;
+            border-left-color: #667eea;
+            color: #667eea;
+        }
+        .spinner-border {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner-border 0.75s linear infinite;
+        }
+        @keyframes spinner-border {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+            border-width: 0.15em;
+            margin-right: 10px;
+            vertical-align: text-bottom;
+        }
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 2px solid #f0f4ff;
+        }
+        .highlight-box p {
+            margin-bottom: 10px;
+            line-height: 1.8;
+        }
+        .no-data {
+            text-align: center;
+            padding: 60px 0;
+            color: #909399;
+            font-size: 16px;
+        }
+        .no-data-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <div class="logo">
+            <img th:src="@{/images/微信图片_20260405124109.png}" alt="Logo" onerror="this.style.display='none'">
+            <span>语文魔方</span>
+        </div>
+        <div class="nav">
+            <a th:href="@{/}">首页</a>
+            <th:block th:if="${user != null && user.role != 'admin'}">
+                <a th:href="@{/forum}">班级留言板</a>
+                <a th:href="@{/energy}">能量监测窗</a>
+                <a th:href="@{/questionnaire}">心理问卷评估</a>
+                <a th:href="@{/diagnosis/personal}" style="background-color: rgba(255, 255, 255, 0.2);">学情诊断报告</a>
+            </th:block>
+            <th:block th:if="${user != null && user.role == 'admin'}">
+                <a th:href="@{/energy/admin}">课堂数据看板</a>
+                <a th:href="@{/forum}">班级留言板</a>
+                <a th:href="@{/diagnosis/class}" style="background-color: rgba(255, 255, 255, 0.2);">学情诊断报告</a>
+                <a th:href="@{/teaching-resources}">教学资源库</a>
+            </th:block>
+        </div>
+    </div>
+    <div class="header-right">
+        <div class="user-info" onclick="window.location.href='/profile'">
+            <div class="user-avatar">👤</div>
+            <span class="username" th:if="${user != null}">
+                <span th:if="${user.role == 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '老师'"></span>
+                <span th:if="${user.role == 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '老师'"></span>
+                <span th:if="${user.role != 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '同学'"></span>
+                <span th:if="${user.role != 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '同学'"></span>
+            </span>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="page-title">个人学情诊断报告</div>
+    <div class="page-desc">全面了解您的心理状态变化，获取个性化的学习与发展建议</div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="section-title">报告概览</div>
+            <div class="generate-time">
+                生成时间：<span th:text="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd HH:mm')}"></span>
+            </div>
+        </div>
+        <div style="color: #606266; line-height: 1.8;">
+            <p>本报告基于您的心理问卷评估结果生成，旨在帮助您更好地了解自己的心理弹性水平，并提供科学的学习与发展建议。</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="section-title">心理问卷得分记录</div>
+        </div>
+
+        <div th:if="${historyData == null or #lists.isEmpty(historyData)}">
+            <div class="no-data">
+                <div class="no-data-icon">📋</div>
+                <p>暂无心理问卷数据</p>
+                <p style="margin-top: 10px; font-size: 14px; color: #999;">完成评估后可查看详细的得分记录和分析</p>
+                <a th:href="@{/questionnaire/start}" class="btn btn-primary" style="margin-top: 20px;">开始评估</a>
+            </div>
+        </div>
+
+        <div th:unless="${historyData == null or #lists.isEmpty(historyData)}">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>填写时间</th>
+                    <th>干预状态</th>
+                    <th>得分</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="data : ${historyData}">
+                    <td th:text="${#temporals.format(data.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td>
+                        <span class="status-badge pre" th:if="${data.interventionStatus == 'PRE_INTERVENTION'}">干预前</span>
+                        <span class="status-badge post" th:if="${data.interventionStatus == 'POST_INTERVENTION'}">干预后</span>
+                    </td>
+                    <td>
+                        <span class="score-value"
+                              th:classappend="${data.cdRiscScore < 55.1} ? 'low' : (${data.cdRiscScore > 81.28} ? 'high' : 'normal')"
+                              th:text="${data.cdRiscScore}"></span>
+                    </td>
+                    <td>
+                        <a th:href="@{/questionnaire/history/{id}(id=${data.id})}" class="btn-link">查看详情</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <a th:href="@{/questionnaire/start}" class="btn btn-primary">➕ 开始新的评估</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="section-title">建议与干预措施</div>
+        </div>
+        <div style="line-height: 1.8; color: #606266;">
+
+            <div id="ai-suggestion-content" th:if="${aiSuggestionPending}">
+                <div class="alert alert-secondary">
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                    正在生成 AI 心理建议，请稍候...
+                </div>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <p style="margin-bottom: 15px; font-weight: bold; color: #2c3e50;">📊 根据最新心理问卷得分情况：</p>
+                <ul style="margin-left: 20px; margin-bottom: 20px;" class="suggestion-list">
+                    <li th:if="${latestScore != null and latestScore >= 80}" style="color: #67c23a;">
+                        ✅ 您的心理弹性水平良好（得分 [[${latestScore}]]），请继续保持积极心态！
+                    </li>
+                    <li th:if="${latestScore != null and latestScore >= 60 and latestScore < 80}" style="color: #e6a23c;">
+                        ⚠️ 您的心理弹性水平中等（60-79 分），建议适当增加自我调节和放松训练。
+                    </li>
+                    <li th:if="${latestScore != null and latestScore < 60}" style="color: #f56c6c;">
+                        🔴 您的心理弹性水平较低（<60 分），建议寻求老师或专业心理咨询帮助。
+                    </li>
+                    <li th:if="${latestScore == null}">
+                        ℹ️ 请先完成心理问卷评估，以便获得个性化的建议。
+                    </li>
+                </ul>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <p style="margin-bottom: 15px; font-weight: bold; color: #2c3e50;">💡 通用建议：</p>
+                <ul style="margin-left: 20px;" class="suggestion-list">
+                    <li>定期参与心理问卷评估，及时了解自己的心理状态变化</li>
+                    <li>在班级留言板积极分享正面情绪，有助于改善整体心理氛围</li>
+                    <li>保持规律的作息和适度的运动，有助于维持良好的心理状态</li>
+                    <li>学习压力管理技巧，如深呼吸、冥想等放松方法</li>
+                    <li>建立良好的人际关系，主动寻求家人、朋友和老师的支持</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <p style="font-weight: bold; color: #2c3e50; margin-bottom: 10px;">🆘 需要帮助时：</p>
+                <p style="margin-bottom: 0;">如果您感到持续的焦虑、抑郁或其他负面情绪，请及时联系学校心理咨询中心或专业心理医生。</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        const latestScore = /*[[${latestScore}]]*/ null;
+        const interventionStatus = /*[[${interventionStatus}]]*/ null;
+
+        if (latestScore != null && interventionStatus != null) {
+            fetch(`/diagnosis/api/ai-suggestion?score=${latestScore}&interventionStatus=${interventionStatus}`)
+                .then(response => response.json())
+                .then(data => {
+                    const aiSuggestionElement = document.getElementById('ai-suggestion-content');
+                    if (aiSuggestionElement) {
+                        if (data.error) {
+                            aiSuggestionElement.innerHTML = `<div class="alert alert-warning">⚠️ ${data.error}: ${data.suggestion}</div>`;
+                        } else {
+                            aiSuggestionElement.innerHTML = `<div class="alert alert-info"><strong style="color: #303133; font-size: 16px;">🤖 AI 心理咨询助手建议：</strong><br><p style="white-space: pre-wrap; line-height: 2; margin-top: 10px; color: #606266;">${data.suggestion}</p></div>`;
+                        }
+                    }
+                })
+                .catch(error => {
+                    const aiSuggestionElement = document.getElementById('ai-suggestion-content');
+                    if (aiSuggestionElement) {
+                        aiSuggestionElement.innerHTML = `<div class="alert alert-warning">❌ 获取 AI 建议失败，网络异常或超时。</div>`;
+                    }
+                });
+        } else {
+            const aiSuggestionElement = document.getElementById('ai-suggestion-content');
+            if (aiSuggestionElement) {
+                aiSuggestionElement.innerHTML = `<div class="alert alert-warning">ℹ️ 暂无心理问卷数据，请先完成测试以便生成 AI 建议。</div>`;
+            }
+        }
+    });
+</script>
+</body>
+</html>

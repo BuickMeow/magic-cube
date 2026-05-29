@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>班级留言板 - 语文魔方</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        body {
+            background: linear-gradient(180deg, #e8f4ff 0%, #f5f7fa 100%);
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .logo img {
+            width: 32px;
+            height: 32px;
+        }
+        .nav {
+            display: flex;
+            gap: 25px;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+        .nav a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .user-info:hover {
+            opacity: 0.8;
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .username {
+            font-size: 14px;
+            color: white;
+        }
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .logout-btn:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 25px auto;
+            padding: 0 20px;
+        }
+        .sort-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .sort-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+        .sort-options {
+            display: flex;
+            gap: 15px;
+        }
+        .sort-btn {
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            transition: all 0.3s;
+        }
+        .sort-btn:hover {
+            background-color: #f0f2f5;
+        }
+        .sort-btn.active {
+            background-color: #667eea;
+            color: white;
+        }
+        .publish-box {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .publish-box textarea {
+            width: 100%;
+            height: 80px;
+            padding: 12px 15px;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: none;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+        .publish-box textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        }
+        .publish-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .emoji-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        .emoji-btn:hover {
+            background-color: #f0f2f5;
+        }
+        .publish-btn {
+            padding: 8px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .publish-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        .post-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .post-user {
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+        }
+        .admin-user {
+            color: #67c23a;
+        }
+        .post-time {
+            color: #999;
+            font-size: 12px;
+        }
+        .post-content {
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .post-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid #f0f2f5;
+        }
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 13px;
+            padding: 5px 10px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        .action-btn:hover {
+            background-color: #f5f7fa;
+        }
+        .like-btn.liked {
+            color: #f56c6c;
+        }
+        .like-btn:not(.liked) {
+            color: #999;
+        }
+        .comment-btn {
+            color: #666;
+        }
+        .comment-btn:hover {
+            color: #667eea;
+        }
+        .delete-btn {
+            color: #f56c6c;
+            text-decoration: none;
+            font-size: 13px;
+            margin-left: auto;
+        }
+        .delete-btn:hover {
+            color: #f78989;
+        }
+        .pin-btn {
+            color: #e6a23c;
+            text-decoration: none;
+            font-size: 13px;
+            padding: 5px 10px;
+            border-radius: 6px;
+            background-color: #fdf6ec;
+            border: 1px solid #faecd8;
+        }
+        .pin-btn:hover {
+            background-color: #faecd8;
+        }
+        .comment-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f2f5;
+        }
+        .comment-list {
+            margin-bottom: 15px;
+        }
+        .comment-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        .comment-item:last-child {
+            border-bottom: none;
+        }
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .comment-user {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 13px;
+        }
+        .comment-time {
+            color: #999;
+            font-size: 12px;
+        }
+        .comment-content {
+            color: #333;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+        .comment-footer {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .comment-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .reply-item {
+            background-color: #fafafa;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        .reply-item:hover {
+            background-color: #f5f7fa;
+        }
+        .comment-box {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            position: relative;
+        }
+        .comment-box-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+        .comment-box input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        .comment-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        }
+        .comment-submit {
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        .comment-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        .reply-input-box {
+            margin-top: 10px;
+            animation: slideDown 0.3s ease;
+        }
+        .reply-form {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+        .reply-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+        .reply-input-wrapper input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        .reply-input-wrapper input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        }
+        .reply-submit {
+            padding: 6px 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        .reply-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .emoji-picker {
+            position: absolute;
+            background: white;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            padding: 10px;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .emoji-picker.show {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 5px;
+        }
+        .emoji-picker.comment-picker {
+            position: absolute;
+            bottom: 50px;
+            left: 0;
+        }
+        .emoji-item {
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            text-align: center;
+            transition: all 0.3s;
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+        }
+        .emoji-item:hover {
+            background-color: #f0f2f5;
+        }
+        .emoji-item img {
+            width: 28px;
+            height: 28px;
+            vertical-align: middle;
+        }
+        .emoji-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-left">
+        <div class="logo">
+            <img th:src="@{/images/微信图片_20260405124109.png}" alt="Logo" onerror="this.style.display='none'">
+            <span>语文魔方</span>
+        </div>
+        <div class="nav">
+            <a th:href="@{/}">首页</a>
+            <th:block th:if="${user != null && user.role != 'admin'}">
+                <a th:href="@{/forum}" style="background-color: rgba(255, 255, 255, 0.2);">班级留言板</a>
+                <a th:href="@{/energy}">能量检测窗</a>
+                <a th:href="@{/questionnaire}">心理问卷评估</a>
+                <a th:href="@{/diagnosis/personal}">学情诊断报告</a>
+            </th:block>
+            <th:block th:if="${user != null && user.role == 'admin'}">
+                <a th:href="@{/energy/admin}">课堂数据看板</a>
+                <a th:href="@{/forum}" style="background-color: rgba(255, 255, 255, 0.2);">班级留言板</a>
+                <a th:href="@{/diagnosis/class}">学情诊断报告</a>
+                <a th:href="@{/teaching-resources}">教学资源库</a>
+            </th:block>
+        </div>
+    </div>
+    <div class="header-right">
+        <div class="user-info" onclick="window.location.href='/profile'">
+            <div class="user-avatar">👤</div>
+            <span class="username" th:if="${user != null}">
+                <span th:if="${user.role == 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '老师'"></span>
+                <span th:if="${user.role == 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '老师'"></span>
+                <span th:if="${user.role != 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '同学'"></span>
+                <span th:if="${user.role != 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '同学'"></span>
+            </span>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="sort-bar">
+        <span class="sort-title">📋 排序方式：</span>
+        <div class="sort-options">
+            <a th:href="@{/forum(sortBy='time')}" class="sort-btn" th:classappend="${currentSort == 'time'} ? 'active' : ''">🕐 按时间</a>
+            <a th:href="@{/forum(sortBy='likes')}" class="sort-btn" th:classappend="${currentSort == 'likes'} ? 'active' : ''">❤️ 按点赞数</a>
+            <a th:href="@{/forum(sortBy='comments')}" class="sort-btn" th:classappend="${currentSort == 'comments'} ? 'active' : ''">💬 按评论数</a>
+        </div>
+    </div>
+
+    <div class="publish-box">
+        <form th:action="@{/forum/post}" method="post">
+            <textarea name="content" id="postContent" placeholder="分享你的想法..." required></textarea>
+            <div class="publish-footer">
+                <div class="emoji-wrapper">
+                    <button type="button" class="emoji-btn" onclick="toggleEmojiPicker('post')">😀</button>
+                    <div class="emoji-picker" id="emojiPicker-post">
+                        <span class="emoji-item" onclick="insertEmoji('post', '😄')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f604.png" alt="😄"></span>
+                        <span class="emoji-item" onclick="insertEmoji('post', '😊')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f60a.png" alt="😊"></span>
+                        <span class="emoji-item" onclick="insertEmoji('post', '😂')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f602.png" alt="😂"></span>
+                        <span class="emoji-item" onclick="insertEmoji('post', '🥰')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f970.png" alt="🥰"></span>
+                        <span class="emoji-item" onclick="insertEmoji('post', '😍')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f60d.png" alt="😍"></span>
+                        <span class="emoji-item" onclick="insertEmoji('post', '🤔')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f914.png" alt="🤔"></span>
+                        <span class="emoji-item" onclick="insertEmoji('post', '👍')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f44d.png" alt="👍"></span>
+                        <span class="emoji-item" onclick="insertEmoji('post', '👏')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f44f.png" alt="👏"></span>
+                        <span class="emoji-item" onclick="insertEmoji('post', '💪')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4aa.png" alt="💪"></span>
+                        <span class="emoji-item" onclick="insertEmoji('post', '❤️')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2764.png" alt="❤️"></span>
+                        <span class="emoji-item" onclick="insertEmoji('post', '🎉')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f389.png" alt="🎉"></span>
+                        <span class="emoji-item" onclick="insertEmoji('post', '✨')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2728.png" alt="✨"></span>
+                        <span class="emoji-item" onclick="insertEmoji('post', '🌟')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f31f.png" alt="🌟"></span>
+                        <span class="emoji-item" onclick="insertEmoji('post', '🔥')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f525.png" alt="🔥"></span>
+                        <span class="emoji-item" onclick="insertEmoji('post', '😭')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f62d.png" alt="😭"></span>
+                        <span class="emoji-item" onclick="insertEmoji('post', '😢')"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f622.png" alt="😢"></span>
+                    </div>
+                </div>
+                <button type="submit" class="publish-btn">发表</button>
+            </div>
+        </form>
+    </div>
+
+    <div th:each="post : ${posts}">
+        <div class="post-item" th:id="'post-' + ${post.id}">
+            <div class="post-header">
+                <span class="post-user" th:classappend="${post.role == 'admin' ? 'admin-user' : ''}">
+                    <span th:if="${post.role == 'admin'}">👨‍ </span>
+                    <span th:text="${post.username}"></span>
+                    <span th:if="${post.isPinned}" style="color: #e6a23c; margin-left: 8px; font-size: 12px; background: #fdf6ec; padding: 2px 6px; border-radius: 4px; border: 1px solid #faecd8;">📌 置顶</span>
+                </span>
+                <span class="post-time" th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+            </div>
+            <div class="post-content" th:text="${post.content}"></div>
+            <div class="post-actions">
+                <button class="action-btn like-btn" th:data-post-id="${post.id}"
+                        th:classappend="${post.likedByCurrentUser} ? 'liked' : ''"
+                        th:title="${#strings.isEmpty(post.likedUsersStr) ? '暂无点赞' : '点赞用户：' + post.likedUsersStr}">
+                    <span th:text="${post.likedByCurrentUser} ? '❤️' : '🤍'"></span>
+                    <span class="like-count" th:text="${post.likes}">0</span>
+                </button>
+                <button class="action-btn comment-btn" onclick="toggleCommentBox(this)">
+                    💬 评论
+                </button>
+
+                <a th:if="${user != null && user.role == 'admin'}"
+                   th:href="@{/forum/pin/{id}(id=${post.id})}"
+                   class="pin-btn">
+                    <span th:text="${post.isPinned} ? '取消置顶' : '置顶'"></span>
+                </a>
+
+                <a th:if="${user != null && ((user.id == post.userId) || (user.role == 'admin' && post.role != 'admin'))}"
+                   th:href="@{/forum/delete/{id}(id=${post.id})}"
+                   class="delete-btn"
+                   th:style="${user != null && user.role == 'admin'} ? 'margin-left: 15px;' : 'margin-left: auto;'"
+                   onclick="return confirm('确定要删除这条留言吗？')">删除</a>
+            </div>
+
+            <div class="comment-section" id="comment-section-${post.id}">
+                <div class="comment-list">
+                    <div th:each="comment : ${post.comments}">
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <span class="comment-user" th:classappend="${comment.role == 'admin' ? 'admin-user' : ''}">
+                                    <span th:if="${comment.role == 'admin'}">👨‍ </span>
+                                    <span th:text="${comment.username}"></span>
+                                    <span th:if="${comment.userId == post.userId}" style="color: #67c23a; font-size: 12px; margin-left: 5px;">（作者）</span>
+                                </span>
+                                <span class="comment-time" th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                            </div>
+                            <div class="comment-content" th:text="${comment.content}"></div>
+                            <div class="comment-footer">
+                                <button class="action-btn like-btn comment-like-btn" th:data-comment-id="${comment.id}"
+                                        th:classappend="${comment.likedByCurrentUser} ? 'liked' : ''"
+                                        th:title="${#strings.isEmpty(comment.likedUsersStr) ? '暂无点赞' : '点赞用户：' + comment.likedUsersStr}"
+                                        style="padding: 3px 8px; font-size: 12px;">
+                                    <span th:text="${comment.likedByCurrentUser} ? '❤️' : '🤍'"></span>
+                                    <span class="like-count" th:text="${comment.likes}">0</span>
+                                </button>
+                                <button class="action-btn reply-btn"
+                                        th:data-comment-id="${comment.id}"
+                                        th:data-post-id="${post.id}"
+                                        th:data-username="${comment.username}"
+                                        style="padding: 3px 8px; font-size: 12px;">
+                                    💬 回复
+                                </button>
+                                <a th:if="${user != null && ((user.id == comment.userId) || (user.id == post.userId) || (user.role == 'admin' && comment.role != 'admin'))}"
+                                   th:href="@{/forum/delete-comment/{id}(id=${comment.id})}"
+                                   class="delete-btn"
+                                   th:onclick="return confirm('确定要删除这条评论吗？\n\n注意：删除后将同时删除该评论下的所有回复，且无法恢复！')"
+                                   style="font-size: 12px;">删除</a>
+                            </div>
+
+                            <div th:if="${comment.comments != null and !#lists.isEmpty(comment.comments)}"
+                                 style="margin-top: 10px; padding-left: 20px; border-left: 2px solid #f0f2f5;">
+                                <div th:each="reply : ${comment.comments}" class="reply-item" style="padding: 8px 12px; margin-bottom: 8px; background-color: #fafafa; border-radius: 6px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <span class="comment-user" th:classappend="${reply.role == 'admin' ? 'admin-user' : ''}" style="font-size: 13px;">
+                                            <span th:if="${reply.role == 'admin'}">👨‍🏫 </span>
+                                            <span th:text="${reply.username}"></span>
+                                            <span th:if="${reply.userId == post.userId}" style="color: #67c23a; font-size: 12px; margin-left: 5px;">（作者）</span>
+                                            <span th:if="${reply.parentUsername != null}" style="color: #909399; margin-left: 5px;">
+                                                回复 <span th:text="'@' + ${reply.parentUsername}"></span>
+                                            </span>
+                                        </span>
+                                        <span class="comment-time" th:if="${reply.createdAt != null}" th:text="${#temporals.format(reply.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                                        <span class="comment-time" th:unless="${reply.createdAt != null}" style="color: #909399; font-size: 12px;">刚刚</span>
+                                    </div>
+                                    <div class="comment-content" th:text="${reply.content}" style="font-size: 14px;"></div>
+                                    <div class="comment-actions">
+                                        <button class="action-btn like-btn comment-like-btn" th:data-comment-id="${reply.id}"
+                                                th:classappend="${reply.likedByCurrentUser} ? 'liked' : ''"
+                                                th:title="${#strings.isEmpty(reply.likedUsersStr) ? '暂无点赞' : '点赞用户：' + reply.likedUsersStr}"
+                                                style="padding: 2px 6px; font-size: 11px;">
+                                            <span th:text="${reply.likedByCurrentUser} ? '❤️' : '🤍'"></span>
+                                            <span class="like-count" th:text="${reply.likes}">0</span>
+                                        </button>
+                                        <button class="action-btn reply-btn"
+                                                th:data-comment-id="${reply.id}"
+                                                th:data-post-id="${post.id}"
+                                                th:data-username="${reply.username}"
+                                                style="padding: 2px 6px; font-size: 11px;">
+                                            💬 回复
+                                        </button>
+                                        <a th:if="${user != null && ((user.id == reply.userId) || (user.id == post.userId) || (user.role == 'admin' && reply.role != 'admin'))}"
+                                           th:href="@{/forum/delete-comment/{id}(id=${reply.id})}"
+                                           class="delete-btn"
+                                           th:onclick="return confirm('确定要删除这条回复吗？\n\n删除后无法恢复！')"
+                                           style="font-size: 11px;">删除</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div th:id="'reply-box-' + ${comment.id}" class="reply-input-box" style="display: none;">
+                                <form th:action="@{/forum/reply/{id}(id=${post.id})}" method="post" class="reply-form">
+                                    <input type="hidden" name="parentId" th:value="${comment.id}">
+                                    <div class="reply-input-wrapper">
+                                        <input type="text" name="content" th:id="'reply-input-' + ${comment.id}" placeholder="写下你的回复..." required>
+                                        <div class="emoji-wrapper">
+                                            <button type="button" class="emoji-btn" th:onclick="|toggleEmojiPicker('reply-${comment.id}')|" style="font-size: 18px; padding: 3px;">😀</button>
+                                            <div class="emoji-picker comment-picker" th:id="'emojiPicker-reply-' + ${comment.id}">
+                                                <span class="emoji-item" th:onclick="|insertEmoji('reply-${comment.id}', '😄')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f604.png" alt="😄"></span>
+                                                <span class="emoji-item" th:onclick="|insertEmoji('reply-${comment.id}', '😊')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f60a.png" alt="😊"></span>
+                                                <span class="emoji-item" th:onclick="|insertEmoji('reply-${comment.id}', '😂')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f602.png" alt="😂"></span>
+                                                <span class="emoji-item" th:onclick="|insertEmoji('reply-${comment.id}', '🥰')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f970.png" alt="🥰"></span>
+                                                <span class="emoji-item" th:onclick="|insertEmoji('reply-${comment.id}', '😍')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f60d.png" alt="😍"></span>
+                                                <span class="emoji-item" th:onclick="|insertEmoji('reply-${comment.id}', '🤔')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f914.png" alt="🤔"></span>
+                                                <span class="emoji-item" th:onclick="|insertEmoji('reply-${comment.id}', '👍')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f44d.png" alt="👍"></span>
+                                                <span class="emoji-item" th:onclick="|insertEmoji('reply-${comment.id}', '👏')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f44f.png" alt="👏"></span>
+                                                <span class="emoji-item" th:onclick="|insertEmoji('reply-${comment.id}', '💪')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4aa.png" alt="💪"></span>
+                                                <span class="emoji-item" th:onclick="|insertEmoji('reply-${comment.id}', '❤️')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2764.png" alt="❤️"></span>
+                                                <span class="emoji-item" th:onclick="|insertEmoji('reply-${comment.id}', '🎉')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f389.png" alt="🎉"></span>
+                                                <span class="emoji-item" th:onclick="|insertEmoji('reply-${comment.id}', '✨')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2728.png" alt="✨"></span>
+                                                <span class="emoji-item" th:onclick="|insertEmoji('reply-${comment.id}', '🌟')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f31f.png" alt="🌟"></span>
+                                                <span class="emoji-item" th:onclick="|insertEmoji('reply-${comment.id}', '🔥')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f525.png" alt="🔥"></span>
+                                                <span class="emoji-item" th:onclick="|insertEmoji('reply-${comment.id}', '😭')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f62d.png" alt="😭"></span>
+                                                <span class="emoji-item" th:onclick="|insertEmoji('reply-${comment.id}', '😢')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f622.png" alt="😢"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="comment-submit" style="padding: 6px 15px; font-size: 13px;">发表</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form class="comment-box" th:action="@{/forum/comment/{id}(id=${post.id})}" method="post">
+                        <div class="comment-box-input-wrapper">
+                            <input type="text" name="content" th:id="'comment-input-' + ${post.id}" placeholder="写下你的评论..." required>
+                            <div class="emoji-wrapper">
+                                <button type="button" class="emoji-btn" th:onclick="|toggleEmojiPicker('comment-${post.id}')|" style="font-size: 18px; padding: 3px;">😀</button>
+                                <div class="emoji-picker comment-picker" th:id="'emojiPicker-comment-' + ${post.id}">
+                                    <span class="emoji-item" th:onclick="|insertEmoji('comment-${post.id}', '😄')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f604.png" alt="😄"></span>
+                                    <span class="emoji-item" th:onclick="|insertEmoji('comment-${post.id}', '😊')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f60a.png" alt="😊"></span>
+                                    <span class="emoji-item" th:onclick="|insertEmoji('comment-${post.id}', '😂')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f602.png" alt="😂"></span>
+                                    <span class="emoji-item" th:onclick="|insertEmoji('comment-${post.id}', '🥰')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f970.png" alt="🥰"></span>
+                                    <span class="emoji-item" th:onclick="|insertEmoji('comment-${post.id}', '😍')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f60d.png" alt="😍"></span>
+                                    <span class="emoji-item" th:onclick="|insertEmoji('comment-${post.id}', '🤔')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f914.png" alt="🤔"></span>
+                                    <span class="emoji-item" th:onclick="|insertEmoji('comment-${post.id}', '👍')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f44d.png" alt="👍"></span>
+                                    <span class="emoji-item" th:onclick="|insertEmoji('comment-${post.id}', '👏')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f44f.png" alt="👏"></span>
+                                    <span class="emoji-item" th:onclick="|insertEmoji('comment-${post.id}', '💪')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4aa.png" alt="💪"></span>
+                                    <span class="emoji-item" th:onclick="|insertEmoji('comment-${post.id}', '❤️')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2764.png" alt="❤️"></span>
+                                    <span class="emoji-item" th:onclick="|insertEmoji('comment-${post.id}', '🎉')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f389.png" alt="🎉"></span>
+                                    <span class="emoji-item" th:onclick="|insertEmoji('comment-${post.id}', '✨')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2728.png" alt="✨"></span>
+                                    <span class="emoji-item" th:onclick="|insertEmoji('comment-${post.id}', '🌟')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f31f.png" alt="🌟"></span>
+                                    <span class="emoji-item" th:onclick="|insertEmoji('comment-${post.id}', '🔥')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f525.png" alt="🔥"></span>
+                                    <span class="emoji-item" th:onclick="|insertEmoji('comment-${post.id}', '😭')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f62d.png" alt="😭"></span>
+                                    <span class="emoji-item" th:onclick="|insertEmoji('comment-${post.id}', '😢')|"><img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f622.png" alt="😢"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="comment-submit">发表</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function scrollToPost() {
+        var hash = window.location.hash;
+        if (hash && hash.startsWith('#post-')) {
+            var postId = hash.replace('#post-', '');
+            var targetElement = document.getElementById('post-' + postId);
+            if (targetElement) {
+                setTimeout(function() {
+                    var headerOffset = 80;
+                    var elementPosition = targetElement.getBoundingClientRect().top;
+                    var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+
+                    targetElement.style.transition = 'background-color 0.5s ease';
+                    targetElement.style.backgroundColor = '#fff7e6';
+                    setTimeout(function() {
+                        targetElement.style.backgroundColor = 'white';
+                    }, 1500);
+                }, 300);
+            }
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', scrollToPost);
+    window.addEventListener('hashchange', scrollToPost);
+
+    function toggleEmojiPicker(type) {
+        const pickerId = 'emojiPicker-' + type;
+        const picker = document.getElementById(pickerId);
+
+        if (!picker) return;
+
+        // 关闭其他所有表情选择器
+        document.querySelectorAll('.emoji-picker').forEach(p => {
+            if (p.id !== pickerId) {
+                p.classList.remove('show');
+            }
+        });
+
+        picker.classList.toggle('show');
+    }
+
+    function insertEmoji(type, emoji) {
+        let input;
+        if (type === 'post') {
+            input = document.getElementById('postContent');
+        } else if (type.startsWith('comment-')) {
+            const postId = type.replace('comment-', '');
+            input = document.getElementById('comment-input-' + postId);
+        } else if (type.startsWith('reply-')) {
+            const commentId = type.replace('reply-', '');
+            input = document.getElementById('reply-input-' + commentId);
+        }
+
+        if (input) {
+            input.value += emoji;
+            input.focus();
+        }
+
+        // 关闭表情选择器
+        const pickerId = 'emojiPicker-' + type;
+        const picker = document.getElementById(pickerId);
+        if (picker) {
+            picker.classList.remove('show');
+        }
+    }
+
+    function toggleCommentBox(btn) {
+        const postItem = btn.closest('.post-item');
+        const commentSection = postItem.querySelector('.comment-section');
+        const isHidden = commentSection.style.display === 'none';
+
+        postItem.querySelectorAll('.comment-section').forEach(section => {
+            section.style.display = 'none';
+        });
+
+        if (isHidden) {
+            commentSection.style.display = 'block';
+        }
+    }
+
+    $(function() {
+        $(".like-btn:not(.comment-like-btn)").click(function() {
+            var $btn = $(this);
+            var postId = $btn.data("post-id");
+
+            $.ajax({
+                url: "/forum/like/" + postId,
+                type: "POST",
+                contentType: "application/json",
+                success: function(data) {
+                    if (data.success) {
+                        var titleText = data.likedUsersStr ? '点赞用户：' + data.likedUsersStr : '暂无点赞';
+                        $btn.attr('title', titleText);
+
+                        if (data.liked) {
+                            $btn.addClass("liked");
+                            $btn.html('<span style="color: #f56c6c;">❤️</span> <span class="like-count">' + data.likes + '</span>');
+                        } else {
+                            $btn.removeClass("liked");
+                            $btn.html('<span style="color: #999;">🤍</span> <span class="like-count">' + data.likes + '</span>');
+                        }
+                    } else {
+                        alert(data.message || "点赞失败");
+                    }
+                },
+                error: function() {
+                    alert("点赞失败，请重试");
+                }
+            });
+        });
+
+        $(".comment-like-btn").click(function(e) {
+            e.stopPropagation();
+            var $btn = $(this);
+            var commentId = $btn.data("comment-id");
+
+            $.ajax({
+                url: "/forum/comment-like/" + commentId,
+                type: "POST",
+                contentType: "application/json",
+                success: function(data) {
+                    if (data.success) {
+                        var titleText = data.likedUsersStr ? '点赞用户：' + data.likedUsersStr : '暂无点赞';
+                        $btn.attr('title', titleText);
+
+                        if (data.liked) {
+                            $btn.addClass("liked");
+                            $btn.html('<span style="color: #f56c6c;">❤️</span> <span class="like-count">' + data.likes + '</span>');
+                        } else {
+                            $btn.removeClass("liked");
+                            $btn.html('<span style="color: #999;">🤍</span> <span class="like-count">' + data.likes + '</span>');
+                        }
+                    } else {
+                        alert(data.message || "点赞失败");
+                    }
+                },
+                error: function() {
+                    alert("点赞失败，请重试");
+                }
+            });
+        });
+
+        $(document).on("click", ".reply-btn", function() {
+            var $btn = $(this);
+            var clickedCommentId = $btn.data("comment-id");
+            var clickedUsername = $btn.data("username");
+
+            var $parentCommentItem = $btn.closest(".comment-item");
+            var topLevelCommentId = $parentCommentItem.find("> .comment-footer .reply-btn:first").data("comment-id");
+            var $replyBox = $("#reply-box-" + topLevelCommentId);
+
+            $(".reply-input-box").not($replyBox).hide();
+            $replyBox.toggle();
+
+            if ($replyBox.is(":visible")) {
+                var $input = $replyBox.find("input[name='content']");
+                $input.focus();
+                var $parentIdInput = $replyBox.find("input[name='parentId']");
+                $parentIdInput.val(clickedCommentId);
+                $input.attr("placeholder", "回复 @" + clickedUsername + "...");
+            }
+        });
+
+        $(document).on("submit", ".reply-form", function(e) {
+            e.preventDefault();
+            var $form = $(this);
+            var formData = $form.serialize();
+            var actionUrl = $form.attr("action");
+
+            $.ajax({
+                url: actionUrl,
+                type: "POST",
+                data: formData,
+                success: function(data) {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message || "回复失败");
+                    }
+                },
+                error: function() {
+                    alert("回复失败，请重试");
+                }
+            });
+        });
+
+        $(document).click(function(event) {
+            const emojiPickers = document.querySelectorAll('.emoji-picker');
+            const emojiBtns = document.querySelectorAll('.emoji-btn');
+
+            emojiPickers.forEach(picker => {
+                if (picker.classList.contains('show')) {
+                    let isClickInside = false;
+
+                    if (picker.contains(event.target)) {
+                        isClickInside = true;
+                    }
+
+                    emojiBtns.forEach(btn => {
+                        if (btn.contains(event.target)) {
+                            isClickInside = true;
+                        }
+                    });
+
+                    if (!isClickInside) {
+                        picker.classList.remove('show');
+                    }
+                }
+            });
+        });
+
+        $(".delete-btn").click(function(e) {
+            var $link = $(this);
+            var isComment = $link.attr("href").includes("delete-comment");
+            var isPost = $link.attr("href").includes("/forum/delete/");
+
+            if ((isComment || isPost) && !confirm("确定要删除吗？\n\n注意：删除后将同时删除该评论下的所有回复，且无法恢复！")) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    });
+</script>
+</body>
+</html>
