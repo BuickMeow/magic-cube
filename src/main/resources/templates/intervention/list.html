@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>干预记录 - 语文天地</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="has-sidebar">
+<div class="header">
+    <div class="header-left">
+        <div class="logo">
+            <img th:src="@{/images/微信图片_20260405124109.png}" alt="Logo" onerror="this.style.display='none'">
+            <span>语文天地</span>
+        </div>
+        <div class="nav">
+            <a th:href="@{/}">首页</a>
+            <a th:if="${user != null && user.role == 'admin'}" th:href="@{/energy/admin}">课堂数据看板</a>
+            <a th:href="@{/forum}">班级留言板</a>
+            <a th:if="${user != null && user.role == 'admin'}" th:href="@{/diagnosis/class}">学情诊断报告</a>
+            <a th:href="@{/teaching-resources}">教学资源库</a>
+            <a th:href="@{/intervention}" style="background-color: rgba(255, 255, 255, 0.2);">干预记录</a>
+        </div>
+    </div>
+    <div class="header-right">
+        <div class="user-info" onclick="window.location.href='/profile'">
+            <div class="user-avatar">👤</div>
+            <span class="username" th:if="${user != null}">
+                <span th:if="${user.role == 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '老师'"></span>
+                <span th:if="${user.role == 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '老师'"></span>
+                <span th:if="${user.role != 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '同学'"></span>
+                <span th:if="${user.role != 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '同学'"></span>
+            </span>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="page-header">
+        <span style="font-size: 24px;">📝</span>
+        <h1 class="page-title">干预记录</h1>
+    </div>
+
+    <!-- 教师端显示 -->
+    <div th:if="${isTeacher}">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>学生干预记录列表</h2>
+                <a th:href="@{/intervention/add}" class="btn btn-primary">➕ 新增干预记录</a>
+            </div>
+            
+            <p style="color: #909399; margin-bottom: 15px;">记录与班级学生之间的心理干预过程，帮助追踪学生心理健康状态变化</p>
+
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>学生姓名</th>
+                    <th>记录标题</th>
+                    <th>干预类型</th>
+                    <th>记录内容摘要</th>
+                    <th>记录时间</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(records)}">
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #909399;">
+                        暂无干预记录，请点击右上角按钮新增记录
+                    </td>
+                </tr>
+                <tr th:each="record : ${records}" style="border-bottom: 1px solid #ebeef5;">
+                    <td style="padding: 12px;" th:text="${record.studentName != null ? record.studentName : record.studentId}"></td>
+                    <td style="padding: 12px;" th:text="${record.title != null ? record.title : '无标题'}"></td>
+                    <td style="padding: 12px;">
+                        <span th:if="${record.interventionType != null}" th:text="${record.interventionType}" style="padding: 4px 8px; background-color: #ecf5ff; color: #409eff; border-radius: 4px; font-size: 12px;"></span>
+                        <span th:if="${record.interventionType == null}" style="color: #909399;">未分类</span>
+                    </td>
+                    <td style="padding: 12px; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" 
+                        th:text="${record.content != null && record.content.length() > 30 ? record.content.substring(0, 30) + '...' : record.content}"></td>
+                    <td style="padding: 12px;" th:text="${#temporals.format(record.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td style="padding: 12px;">
+                        <a th:href="@{/intervention/student/{id}(id=${record.studentId})}" class="btn btn-small" style="margin-right: 8px;">查看详情</a>
+                        <form th:action="@{/intervention/delete/{id}(id=${record.id})}" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-small btn-danger" onclick="return confirm('确定要删除这条记录吗？')">删除</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>班级学生列表</h2>
+            <p style="color: #909399; margin-bottom: 15px;">点击下方学生姓名可快速查看该学生的干预记录</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <a th:each="student : ${classStudents}" 
+                   th:href="@{/intervention/student/{id}(id=${student.id})}"
+                   style="display: inline-block; padding: 8px 16px; background-color: #f0f2f5; border-radius: 6px; color: #606266; text-decoration: none; font-size: 14px;">
+                    <span th:text="${student.name != null ? student.name : student.username}"></span>
+                </a>
+            </div>
+            <div th:if="${#lists.isEmpty(classStudents)}" style="color: #909399; padding: 20px; text-align: center;">
+                该班级暂无学生
+            </div>
+        </div>
+    </div>
+
+    <!-- 学生端显示 -->
+    <div th:if="${!isTeacher}">
+        <div class="card">
+            <h2>我的干预记录</h2>
+            <p style="color: #909399; margin-bottom: 15px;">老师对您进行的心理干预记录</p>
+
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>记录老师</th>
+                    <th>记录标题</th>
+                    <th>干预类型</th>
+                    <th>记录内容</th>
+                    <th>记录时间</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(records)}">
+                    <td colspan="5" style="text-align: center; padding: 40px; color: #909399;">
+                        暂无干预记录
+                    </td>
+                </tr>
+                <tr th:each="record : ${records}" style="border-bottom: 1px solid #ebeef5;">
+                    <td style="padding: 12px;" th:text="${record.teacherName != null ? record.teacherName : record.teacherId}"></td>
+                    <td style="padding: 12px;" th:text="${record.title != null ? record.title : '无标题'}"></td>
+                    <td style="padding: 12px;">
+                        <span th:if="${record.interventionType != null}" th:text="${record.interventionType}" style="padding: 4px 8px; background-color: #ecf5ff; color: #409eff; border-radius: 4px; font-size: 12px;"></span>
+                        <span th:if="${record.interventionType == null}" style="color: #909399;">未分类</span>
+                    </td>
+                    <td style="padding: 12px;" th:text="${record.content}"></td>
+                    <td style="padding: 12px;" th:text="${#temporals.format(record.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

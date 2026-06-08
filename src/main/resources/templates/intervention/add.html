@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>新增干预记录 - 语文天地</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #303133;
+            font-weight: 500;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #dcdfe6;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 200px;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #409eff;
+        }
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+<body class="has-sidebar">
+<div class="header">
+    <div class="header-left">
+        <div class="logo">
+            <img th:src="@{/images/微信图片_20260405124109.png}" alt="Logo" onerror="this.style.display='none'">
+            <span>语文天地</span>
+        </div>
+        <div class="nav">
+            <a th:href="@{/}">首页</a>
+            <a th:href="@{/energy/admin}">课堂数据看板</a>
+            <a th:href="@{/forum}">班级留言板</a>
+            <a th:href="@{/diagnosis/class}">学情诊断报告</a>
+            <a th:href="@{/teaching-resources}">教学资源库</a>
+            <a th:href="@{/intervention}" style="background-color: rgba(255, 255, 255, 0.2);">干预记录</a>
+        </div>
+    </div>
+    <div class="header-right">
+        <div class="user-info" onclick="window.location.href='/profile'">
+            <div class="user-avatar">👤</div>
+            <span class="username" th:if="${user != null}">
+                <span th:if="${user.role == 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '老师'"></span>
+                <span th:if="${user.role == 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '老师'"></span>
+            </span>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="page-header">
+        <span style="font-size: 24px;">📝</span>
+        <h1 class="page-title">新增干预记录</h1>
+    </div>
+
+    <div class="card">
+        <form th:action="@{/intervention/add}" method="post">
+            <div class="form-group">
+                <label for="studentId">选择学生 <span style="color: #f56c6c;">*</span></label>
+                <select id="studentId" name="studentId" required>
+                    <option value="">请选择学生</option>
+                    <option th:each="student : ${classStudents}" 
+                            th:value="${student.id}" 
+                            th:text="${student.name != null ? student.name + ' (' + student.username + ')' : student.username}"
+                            th:selected="${selectedStudentId != null && selectedStudentId == student.id}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="title">记录标题 <span style="color: #f56c6c;">*</span></label>
+                <input type="text" id="title" name="title" placeholder="例如：课后谈心记录、心理疏导记录等" required>
+            </div>
+
+            <div class="form-group">
+                <label for="interventionType">干预类型</label>
+                <select id="interventionType" name="interventionType">
+                    <option value="">请选择类型</option>
+                    <option value="谈心谈话">谈心谈话</option>
+                    <option value="心理疏导">心理疏导</option>
+                    <option value="家校沟通">家校沟通</option>
+                    <option value="同伴互助">同伴互助</option>
+                    <option value="课堂关注">课堂关注</option>
+                    <option value="其他">其他</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="content">干预过程记录 <span style="color: #f56c6c;">*</span></label>
+                <textarea id="content" name="content" placeholder="请详细记录干预过程，包括：&#10;1. 学生当前的心理状态描述&#10;2. 采取的干预措施&#10;3. 学生的反应和变化&#10;4. 后续跟进计划" required></textarea>
+            </div>
+
+            <div class="form-actions">
+                <a th:href="@{/intervention}" class="btn">取消</a>
+                <button type="submit" class="btn btn-primary">保存记录</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

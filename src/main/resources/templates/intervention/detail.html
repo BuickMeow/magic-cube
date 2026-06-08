@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>干预记录详情 - 语文天地</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="has-sidebar">
+<div class="header">
+    <div class="header-left">
+        <div class="logo">
+            <img th:src="@{/images/微信图片_20260405124109.png}" alt="Logo" onerror="this.style.display='none'">
+            <span>语文天地</span>
+        </div>
+        <div class="nav">
+            <a th:href="@{/}">首页</a>
+            <a th:href="@{/energy/admin}">课堂数据看板</a>
+            <a th:href="@{/forum}">班级留言板</a>
+            <a th:href="@{/diagnosis/class}">学情诊断报告</a>
+            <a th:href="@{/teaching-resources}">教学资源库</a>
+            <a th:href="@{/intervention}" style="background-color: rgba(255, 255, 255, 0.2);">干预记录</a>
+        </div>
+    </div>
+    <div class="header-right">
+        <div class="user-info" onclick="window.location.href='/profile'">
+            <div class="user-avatar">👤</div>
+            <span class="username" th:if="${user != null}">
+                <span th:if="${user.role == 'admin' && user.name != null}" th:text="'Hi, ' + ${user.name} + '老师'"></span>
+                <span th:if="${user.role == 'admin' && user.name == null}" th:text="'Hi, ' + ${user.username} + '老师'"></span>
+            </span>
+        </div>
+        <a th:href="@{/logout}" class="logout-btn">退出登录</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="page-header">
+        <span style="font-size: 24px;">📝</span>
+        <h1 class="page-title">干预记录详情</h1>
+    </div>
+
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 th:text="${student.name != null ? student.name : student.username} + ' 的干预记录'"></h2>
+            <a th:href="@{/intervention/add(studentId=${student.id})}" class="btn btn-primary">➕ 新增记录</a>
+        </div>
+        <p style="color: #909399; margin-bottom: 15px;" th:text="'班级ID: ' + ${student.classId != null ? student.classId : '未设置'}"></p>
+    </div>
+
+    <div th:if="${#lists.isEmpty(records)}" class="card">
+        <div style="text-align: center; padding: 40px; color: #909399;">
+            <p>暂无干预记录</p>
+            <a th:href="@{/intervention/add(studentId=${student.id})}" class="btn btn-primary" style="margin-top: 20px;">添加第一条记录</a>
+        </div>
+    </div>
+
+    <div th:each="record : ${records}" class="card" style="margin-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+            <div>
+                <h3 style="margin: 0; color: #303133;" th:text="${record.title != null ? record.title : '无标题'}"></h3>
+                <div style="margin-top: 8px; color: #909399; font-size: 13px;">
+                    <span th:text="'记录老师: ' + (${record.teacherName != null ? record.teacherName : record.teacherId})"></span>
+                    <span style="margin: 0 10px;">|</span>
+                    <span th:text="'时间: ' + ${#temporals.format(record.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                    <span th:if="${record.interventionType != null}" style="margin: 0 10px;">|</span>
+                    <span th:if="${record.interventionType != null}" 
+                          style="padding: 2px 8px; background-color: #ecf5ff; color: #409eff; border-radius: 4px; font-size: 12px;"
+                          th:text="${record.interventionType}"></span>
+                </div>
+            </div>
+            <form th:action="@{/intervention/delete/{id}(id=${record.id})}" method="post">
+                <button type="submit" class="btn btn-small btn-danger" onclick="return confirm('确定要删除这条记录吗？')">删除</button>
+            </form>
+        </div>
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; line-height: 1.8; color: #606266; white-space: pre-wrap;" th:text="${record.content}"></div>
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <a th:href="@{/intervention}" class="btn">← 返回干预记录列表</a>
+    </div>
+</div>
+</body>
+</html>
