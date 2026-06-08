@@ -20,12 +20,14 @@
                 <a th:href="@{/energy}">能量检测窗</a>
                 <a th:href="@{/questionnaire}">心理问卷评估</a>
                 <a th:href="@{/diagnosis/personal}">学情诊断报告</a>
+                <a th:href="@{/intervention}">干预记录</a>
             </th:block>
             <th:block th:if="${user != null && user.role == 'admin'}">
                 <a th:href="@{/energy/admin}">课堂数据看板</a>
                 <a th:href="@{/forum}">班级留言板</a>
                 <a th:href="@{/diagnosis/class}">学情诊断报告</a>
                 <a th:href="@{/teaching-resources}">教学资源库</a>
+                <a th:href="@{/intervention}">干预记录</a>
             </th:block>
             <th:block th:if="${user == null}">
                 <a th:href="@{/login}">登录</a>

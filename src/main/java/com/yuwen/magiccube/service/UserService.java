@@ -178,6 +178,19 @@ public class UserService {
         return userRepository.findByRole("student");
     }
 
+    // 获取指定班级的学生
+    public List<User> getStudentsByClassId(String classId) {
+        if (classId == null || classId.isEmpty()) {
+            return List.of();
+        }
+        return userRepository.findByClassIdAndRole(classId, "student");
+    }
+
+    // 根据ID查找用户
+    public User findById(Integer userId) {
+        return userRepository.findById(userId).orElse(null);
+    }
+
     // 获取所有管理员
     public List<User> getAllAdmins() {
         return userRepository.findByRole("admin");

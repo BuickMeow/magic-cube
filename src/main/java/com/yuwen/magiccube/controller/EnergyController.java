@@ -164,16 +164,17 @@ public class EnergyController {
     public String adminEnergy(HttpSession session, Model model) {
         User user = (User) session.getAttribute("currentUser");
         if (user != null && "admin".equals(user.getRole())) {
-            // 🌟 修改：只获取学生角色的问卷数据
-            List<User> allStudents = userRepository.findByRole("student");
+            // 🌟 修改：只获取当前老师所在班级的学生问卷数据
+            String teacherClassId = user.getClassId();
+            List<User> classStudents = userRepository.findByClassIdAndRole(teacherClassId, "student");
             Set<Integer> studentIds = new HashSet<>();
-            for (User student : allStudents) {
+            for (User student : classStudents) {
                 studentIds.add(student.getId());
             }
             
-            System.out.println("\n【全班心理能量数据明细】系统中有 " + allStudents.size() + " 个学生账号");
+            System.out.println("\n【全班心理能量数据明细】班级 " + teacherClassId + " 中有 " + classStudents.size() + " 个学生账号");
             
-            // 获取所有问卷数据，然后过滤出学生角色的数据
+            // 获取所有问卷数据，然后过滤出本班学生角色的数据
             List<PsychologicalData> allData = psychologicalDataService.getAllClassData();
             List<PsychologicalData> filteredData = new ArrayList<>();
             
@@ -181,11 +182,11 @@ public class EnergyController {
                 if (data.getUserId() != null && studentIds.contains(data.getUserId())) {
                     filteredData.add(data);
                 } else {
-                    System.out.println("  ⚠️ 过滤掉非学生账号 ID=" + data.getUserId() + " 的数据");
+                    System.out.println("  ⚠️ 过滤掉非本班学生账号 ID=" + data.getUserId() + " 的数据");
                 }
             }
             
-            System.out.println("✓ 共加载 " + filteredData.size() + " 条学生数据");
+            System.out.println("✓ 共加载 " + filteredData.size() + " 条本班学生数据");
 
             // 为每条数据加载学生姓名
             for (PsychologicalData data : filteredData) {
@@ -198,14 +199,15 @@ public class EnergyController {
                 }
             }
 
-            // 获取全班统计数据
-            Map<String, Object> scoreDistribution = psychologicalDataService.getClassScoreDistribution();
-            Map<String, Object> interventionComparison = psychologicalDataService.getClassInterventionComparison();
+            // 获取本班统计数据
+            Map<String, Object> scoreDistribution = psychologicalDataService.getClassScoreDistributionByClassId(teacherClassId);
+            Map<String, Object> interventionComparison = psychologicalDataService.getClassInterventionComparisonByClassId(teacherClassId);
 
             model.addAttribute("allData", filteredData);  // 🌟 使用过滤后的数据
             model.addAttribute("user", user);
             model.addAttribute("scoreDistribution", scoreDistribution);
             model.addAttribute("interventionComparison", interventionComparison);
+            model.addAttribute("classId", teacherClassId);
 
             return "admin-energy";
         }

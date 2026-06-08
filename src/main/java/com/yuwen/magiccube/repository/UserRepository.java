@@ -15,4 +15,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findByClassId(String classId);
     // 按角色查询所有用户
     List<User> findByRole(String role);
+    // 按班级和角色查询学生
+    List<User> findByClassIdAndRole(String classId, String role);
 }

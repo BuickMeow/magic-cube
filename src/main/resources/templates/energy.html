@@ -21,6 +21,7 @@
             <a th:href="@{/questionnaire}">心理问卷评估</a>
             <a th:href="@{/diagnosis/personal}">学情诊断报告</a>
             <a th:if="${user != null && user.role == 'admin'}" th:href="@{/energy/admin}">全班数据</a>
+            <a th:href="@{/intervention}">干预记录</a>
         </div>
     </div>
     <div class="header-right">
