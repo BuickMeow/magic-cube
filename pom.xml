@@ -14,7 +14,7 @@
     <artifactId>magic-cube</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>magic-cube</name>
-    <description>语文魔方 - 班级留言板与能量监测窗</description>
+    <description>语文天地 - 班级留言板与能量监测窗</description>
 
     <properties>
         <java.version>17</java.version>
