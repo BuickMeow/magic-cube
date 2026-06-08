@@ -2,467 +2,16 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>首页 - 语文魔方</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Microsoft YaHei", sans-serif;
-        }
-        body {
-            background: linear-gradient(180deg, #e8f4ff 0%, #f5f7fa 100%);
-            min-height: 100vh;
-        }
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-        }
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 30px;
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .logo img {
-            width: 32px;
-            height: 32px;
-        }
-        .nav {
-            display: flex;
-            gap: 25px;
-        }
-        .nav a {
-            color: white;
-            text-decoration: none;
-            font-size: 15px;
-            padding: 8px 16px;
-            border-radius: 20px;
-            transition: all 0.3s;
-        }
-        .nav a:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-        .user-info:hover {
-            opacity: 0.8;
-        }
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
-        .username {
-            font-size: 14px;
-            color: white;
-        }
-        .logout-btn {
-            color: white;
-            text-decoration: none;
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        .logout-btn:hover {
-            opacity: 1;
-            text-decoration: underline;
-        }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 30px 20px;
-        }
-        .top-section {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-        .welcome-card {
-            flex: 1;
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-        }
-        .welcome-greeting {
-            font-size: 20px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        .welcome-message {
-            font-size: 14px;
-            color: #666;
-            line-height: 1.6;
-        }
-        .status-card {
-            width: 320px;
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-        }
-        .status-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 15px;
-        }
-        .status-title {
-            font-size: 14px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .status-badge {
-            background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
-            color: white;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-        }
-        .energy-label {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 8px;
-        }
-        .energy-hearts {
-            display: flex;
-            gap: 4px;
-            flex-wrap: wrap;
-        }
-        .energy-heart {
-            width: 18px;
-            height: 18px;
-            background: #e8e8e8;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .energy-heart.filled {
-            background: #ff6b9d;
-            transform: scale(1.1);
-        }
-        .energy-heart:hover {
-            transform: scale(1.2);
-        }
-        .status-text {
-            margin-top: 10px;
-            font-size: 13px;
-            color: #666;
-            font-weight: bold;
-        }
-        .function-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
-            margin-bottom: 25px;
-        }
-        .function-card {
-            background: white;
-            border-radius: 16px;
-            padding: 35px 30px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            min-height: 140px;
-        }
-        .function-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-        }
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 18px;
-        }
-        .card-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            flex-shrink: 0;
-        }
-        .card-icon.blue {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .card-icon.pink {
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-        }
-        .card-icon.yellow {
-            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-        }
-        .card-icon.green {
-            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-        }
-        .card-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .card-desc {
-            font-size: 14px;
-            color: #666;
-            line-height: 1.8;
-            padding-left: 63px;
-        }
-        /* 教师端导航栏样式 */
-        .teacher-nav {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-        .teacher-nav-item {
-            background: white;
-            border-radius: 16px;
-            padding: 35px 25px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-        .teacher-nav-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-            border-color: #667eea;
-        }
-        .teacher-nav-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            margin-bottom: 15px;
-        }
-        .teacher-nav-icon.blue {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .teacher-nav-icon.pink {
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-        }
-        .teacher-nav-icon.yellow {
-            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-        }
-        .teacher-nav-icon.green {
-            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-        }
-        .teacher-nav-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 8px;
-        }
-        .teacher-nav-desc {
-            font-size: 14px;
-            color: #666;
-            line-height: 1.5;
-        }
-        .teacher-suggestion-section {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-            margin-bottom: 25px;
-        }
-        .teacher-suggestion-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-        .teacher-suggestion-icon {
-            font-size: 18px;
-        }
-        .teacher-suggestion-title {
-            font-size: 16px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .teacher-suggestion-list {
-            list-style: none;
-        }
-        .teacher-suggestion-item {
-            padding: 12px 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-size: 13px;
-            line-height: 1.6;
-            color: #666;
-        }
-        .teacher-suggestion-item::before {
-            content: "• ";
-            color: #667eea;
-            font-size: 18px;
-            line-height: 1;
-        }
-        .suggestion-section {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-        }
-        .suggestion-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-        .suggestion-icon {
-            font-size: 18px;
-        }
-        .suggestion-title {
-            font-size: 16px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .suggestion-list {
-            list-style: none;
-        }
-        .suggestion-item {
-            padding: 12px 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-size: 13px;
-            color: #666;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        .suggestion-item::before {
-            content: "•";
-            color: #667eea;
-            font-size: 18px;
-            line-height: 1;
-        }
-        .more-link {
-            text-align: center;
-            padding: 10px;
-            color: #667eea;
-            font-size: 13px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        .more-link:hover {
-            text-decoration: underline;
-        }
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-        .modal-overlay.show {
-            display: flex;
-        }
-        .modal {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        }
-        .modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .modal-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .close-btn {
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: #f0f2f5;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 20px;
-            color: #666;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-        }
-        .close-btn:hover {
-            background: #e4e7ed;
-            color: #333;
-        }
-        .modal-suggestion-item {
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            font-size: 14px;
-            color: #666;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-        .modal-suggestion-item::before {
-            content: "💡";
-            font-size: 18px;
-        }
-    </style>
+    <title>首页 - 语文天地</title>
+    
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body>
+<body class="has-sidebar">
 <div class="header">
     <div class="header-left">
         <div class="logo">
             <img th:src="@{/images/微信图片_20260405124109.png}" alt="Logo" onerror="this.style.display='none'">
-            <span>语文魔方</span>
+            <span>语文天地</span>
         </div>
         <div class="nav">
             <a th:href="@{/}" style="background-color: rgba(255, 255, 255, 0.2);">首页</a>
@@ -505,7 +54,7 @@
             <div class="welcome-greeting" th:if="${user != null && user.role == 'admin' && user.name == null}" th:text="'上午好，' + ${user.username} + '老师'"></div>
             <div class="welcome-greeting" th:if="${user != null && user.role != 'admin' && user.name != null}" th:text="'上午好，' + ${user.name} + '同学'"></div>
             <div class="welcome-greeting" th:if="${user != null && user.role != 'admin' && user.name == null}" th:text="'上午好，' + ${user.username} + '同学'"></div>
-            <div class="welcome-greeting" th:if="${user == null}">欢迎来到语文魔方</div>
+            <div class="welcome-greeting" th:if="${user == null}">欢迎来到语文天地</div>
             <div class="welcome-message" th:if="${user != null}">今天感觉如何？无论风雨，我们都在这里陪伴你。</div>
             <div class="welcome-message" th:if="${user == null}">请登录或注册账号以使用全部功能</div>
         </div>
@@ -533,7 +82,7 @@
 
     <!-- 平台特色介绍 -->
     <div style="background: white; border-radius: 16px; padding: 30px; margin-top: 25px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); text-align: center;" th:if="${user == null}">
-        <div style="font-size: 22px; font-weight: bold; color: #2c3e50; margin-bottom: 25px;">🌈 为什么选择语文魔方？</div>
+        <div style="font-size: 22px; font-weight: bold; color: #2c3e50; margin-bottom: 25px;">🌈 为什么选择语文天地？</div>
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px;">
             <div style="padding: 20px;">
                 <div style="font-size: 48px; margin-bottom: 15px;">🎯</div>
@@ -554,13 +103,13 @@
     </div>
 
     <!-- 温馨提示 -->
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px; padding: 25px 30px; margin-top: 25px; display: flex; align-items: center; gap: 20px; color: white;" th:if="${user == null}">
+    <div style="background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%); border-radius: 16px; padding: 25px 30px; margin-top: 25px; display: flex; align-items: center; gap: 20px; color: white;" th:if="${user == null}">
         <div style="font-size: 48px; flex-shrink: 0;">🚀</div>
         <div style="flex: 1;">
             <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">立即开始您的心理成长之旅</div>
             <div style="font-size: 14px; opacity: 0.9; line-height: 1.6; margin-bottom: 15px;">注册账号只需 30 秒，即可体验全部功能。我们承诺保护您的隐私安全。</div>
             <div style="display: flex; gap: 12px;">
-                <a th:href="@{/register}" style="background: white; color: #667eea; padding: 10px 24px; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block; transition: all 0.3s; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(0, 0, 0, 0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.15)';">立即注册</a>
+                <a th:href="@{/register}" style="background: white; color: #ff6b6b; padding: 10px 24px; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block; transition: all 0.3s; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(0, 0, 0, 0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.15)';">立即注册</a>
                 <a th:href="@{/login}" style="background: transparent; color: white; padding: 10px 24px; border-radius: 25px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block; border: 2px solid white; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.2)';" onmouseout="this.style.background='transparent';">已有账号？登录</a>
             </div>
         </div>
@@ -574,7 +123,7 @@
         </div>
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; text-align: center;">
             <div style="padding: 15px;">
-                <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; margin: 0 auto 12px;">1</div>
+                <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; margin: 0 auto 12px;">1</div>
                 <div style="font-size: 14px; font-weight: bold; color: #2c3e50; margin-bottom: 5px;">注册账号</div>
                 <div style="font-size: 13px; color: #999;">填写基本信息完成注册</div>
             </div>
@@ -675,7 +224,7 @@
             <li class="teacher-suggestion-item">建立学生心理档案，长期跟踪关注</li>
         </ul>
         <div style="margin-top: 15px; text-align: center;">
-            <button onclick="showMoreSuggestions()" style="background: none; color: #667eea; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: bold;">查看更多建议</button>
+            <button onclick="showMoreSuggestions()" style="background: none; color: #ff6b6b; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: bold;">查看更多建议</button>
         </div>
     </div>
 
